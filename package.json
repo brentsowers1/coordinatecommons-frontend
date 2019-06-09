@@ -2,7 +2,7 @@
   "name": "coordinate-commons",
   "version": "0.1.0",
   "private": true,
-  "homepage": "http://www.coordinatecommons.com/app",  
+  "homepage": "http://www.coordinatecommons.com/app",
   "dependencies": {
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
@@ -10,6 +10,8 @@
     "react-dom": "^16.8.6",
     "react-google-maps": "^9.4.5",
     "react-redux": "^7.0.3",
+    "react-router-bootstrap": "^0.25.0",
+    "react-router-dom": "^5.0.1",
     "react-scripts": "3.0.1",
     "recompose": "^0.30.0",
     "redux": "^4.0.1"
@@ -19,7 +21,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "publish": "aws s3 sync ./build s3://coordinatecommons.com/app --delete"    
+    "publish": "aws s3 sync ./build s3://coordinatecommons.com/app --delete"
   },
   "eslintConfig": {
     "extends": "react-app"
