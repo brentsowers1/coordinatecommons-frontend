@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { ListGroup } from 'react-bootstrap';
-import Place from './Place'
 import PropTypes from 'prop-types';
 
 class PlaceList extends Component {
@@ -14,11 +13,14 @@ class PlaceList extends Component {
     return (
       <ListGroup>
         {this.props.places.map(place =>
-          <Place
-            id={place.id}
-            name={place.name}
-            selected={place.id === this.props.selectedPlaceId}
-            onClick={() => this.props.onPlaceClick(place)} />
+          <ListGroup.Item
+            action={place.id !== this.props.selectedPlaceId}
+            key={place.id}
+            eventKey={place.id}
+            active={place.id === this.props.selectedPlaceId}
+            onClick={() => this.props.onPlaceClick(place)}>
+            {place.name}
+          </ListGroup.Item>
         )}
       </ListGroup>
     )
