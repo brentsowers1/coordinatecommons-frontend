@@ -4,3 +4,10 @@ export function placeClicked(place) {
       place
   }
 }
+
+export function placeTypeChanged(placeType) {
+  return {
+    type: 'PLACE_TYPE_CHANGED',
+    placeType
+  }
+}
