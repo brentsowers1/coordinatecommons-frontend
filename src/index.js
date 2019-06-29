@@ -13,7 +13,7 @@ let store = createStore(coordinateCommonsApp);
 
 render(
   <Provider store={store}>
-    <Router>
+    <Router basename='/app'>
       <NavHeader />
       
       <Route path="/" exact component={ActivePlaces} />
