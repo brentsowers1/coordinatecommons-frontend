@@ -3,13 +3,15 @@ import Places from '../components/Places';
 import { placeTypeChanged, placeClicked } from '../actions/PlaceActions';
 
 const getCurrentPlaceList = (allPlaces, activePlaceType) => {
-  return allPlaces ? allPlaces.filter(place => place.type === activePlaceType) : [];
+  return allPlaces ? allPlaces[activePlaceType] : [];
 }
 
 const mapStateToProps = (state, ownProps) => {
-  const activePlaceType = ownProps.match.params.placeType ? ownProps.match.params.placeType : state.places.activePlaceType;
+  const activePlaceType = ownProps.match.params.placeType ? 
+    ownProps.match.params.placeType : 
+    state.places.activePlaceType;
   return {
-    places: getCurrentPlaceList(state.places.allPlaces, activePlaceType),
+    places: getCurrentPlaceList(state.places.placeTypes, activePlaceType),
     selectedPlaceId: state.places.selectedPlaceId,
     activePlaceType: activePlaceType
   }

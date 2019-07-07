@@ -7,6 +7,7 @@ import {
 import { compose, withProps } from "recompose";
 import { connect } from "react-redux";
 import getSelectedPlace from '../reducers/getSelectedPlace';
+import getLatLng from '../reducers/getLatLng';
 
 const Map = compose(
   withProps({
@@ -20,7 +21,7 @@ const Map = compose(
   withGoogleMap
 )(props => (
   <GoogleMap
-    zoom={props.zoom}
+    zoom={4}
     center={props.center}
   >
 
@@ -29,9 +30,11 @@ const Map = compose(
 
 const mapStateToProps = state => {
   const selectedPlace = getSelectedPlace(state);
+  console.log("in Map.js, selectedPlace = ", selectedPlace);
   return {
-    center: selectedPlace ? selectedPlace.center : {lat: 40, lng:-77},
-    zoom: selectedPlace ? selectedPlace.zoom : 8
+    center: selectedPlace ? 
+      getLatLng(selectedPlace.center) : 
+      getLatLng([-77, 40])
   }
 }
 

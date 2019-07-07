@@ -15,8 +15,8 @@ const NavHeader = () => (
           <Nav.Item>My Page</Nav.Item>
         </LinkContainer>
         <NavDropdown title="Places" id="places-dropdown">
-          <LinkContainer to="/places/state">
-            <NavDropdown.Item eventKey={2.1}>States</NavDropdown.Item>
+          <LinkContainer to="/places/us-state">
+            <NavDropdown.Item eventKey={2.1}>US States</NavDropdown.Item>
           </LinkContainer>
           <LinkContainer to="/places/country">
             <NavDropdown.Item eventKey={2.2}>Countries</NavDropdown.Item>
