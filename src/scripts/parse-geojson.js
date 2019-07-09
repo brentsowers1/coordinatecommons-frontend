@@ -1,24 +1,67 @@
 const fs = require("fs");
-const contents = fs.readFileSync("../../public/data/us-state.json");
+
+const validTypes = ['country', 'us-state', 'canada-state', 'mexico-state', 'us-county'];
+const isValidStateType = ((val) => ['us-state', 'canada-state', 'mexico-state'].includes(val) );
+if (process.argv.length < 3 || !validTypes.includes(process.argv[2])) {
+  console.error("You must specify one of the valid data types as a command line argument:\n" + 
+                "    country\n" + 
+                "    us-state\n" + 
+                "    canada-state\n" + 
+                "    mexico-state\n" + 
+                "    us-county\n");
+  process.exit(1);
+}
+
+const inputType = process.argv[2];
+const inputFileName = (() => {
+  switch(inputType) {
+    case 'country': 
+      return 'country.json';
+    case 'us-state':
+    case 'canada-state':
+    case 'mexico-state': 
+      return 'states.json';
+    case 'us-county': 
+      return 'county.json';
+    default: 
+      return null;
+  }
+})();
+
+const contents = fs.readFileSync(`./geojson-data/${inputFileName}`);
 const jsonContent = JSON.parse(contents);
 
-var structured = jsonContent.features.map(state => {
-  console.log("state => ");
-  const name = state.properties.name;
-  const id = state.properties.postal;
-  const center = [state.properties.longitude, state.properties.latitude];
-  const featureType = state.geometry.type;
+const neededCountryCode = (() => {
+  switch(inputType) {
+    case 'us-state': return 'US';
+    case 'canada-state': return 'CA';
+    case 'mexico-state': return 'MX';
+    default: return null;
+  }
+})();
+
+const isCountry = inputType === 'country';
+
+const geoJsonItems = isValidStateType(inputType) ? 
+  jsonContent.features.filter(x => x.properties.iso_a2 && x.properties.iso_a2 === neededCountryCode) :
+  jsonContent.features;
+
+const structured = geoJsonItems.map(item => {
+  //console.log("state => ");
+  const name = isCountry ? item.properties.ADMIN : item.properties.name;
+  const id = isCountry ? item.properties.NAME : item.properties.postal;
+  const featureType = item.geometry.type;
   if (featureType !== "Polygon" && featureType !== "MultiPolygon") {
-    console.log("Got an unexpected coordinate type - " + coordinateType);
-    return null;
+    console.error("Got an unexpected coordinate type - " + coordinateType);
+    process.exit(1);
   } else {
-    const coordinates = state.geometry.coordinates.map(polygon => {
+    const coordinates = item.geometry.coordinates.map(polygon => {
       if (featureType === "MultiPolygon") {
         polygon = polygon[0];
       }
-      console.log("    polygon => " + JSON.stringify(polygon));
+      //console.log("    polygon => " + JSON.stringify(polygon));
       return polygon.map(coordinate => {
-        console.log("        coordinate => " + JSON.stringify(coordinate));
+        //console.log("        coordinate => " + JSON.stringify(coordinate));
         // The input files have a really high number of decimal places. This is not necessary, so 
         // to reduce data file size sent to front end, and memory used up, reduce precision
         const lon = parseFloat(coordinate[0].toFixed(4));
@@ -26,6 +69,11 @@ var structured = jsonContent.features.map(state => {
         return [lon, lat];    
       });
     });
+    // Country does not have a defined center so just use the first coordinate
+    const center = isCountry ? 
+      coordinates[0][0] :
+      [item.properties.longitude, item.properties.latitude];
+
     return {
       id,
       name,
@@ -35,11 +83,11 @@ var structured = jsonContent.features.map(state => {
   }
 });
 
-fs.writeFile("../../public/data/us-state-converted.json", JSON.stringify(structured), (err) => {
+fs.writeFile(`../../public/data/${inputType}.json`, JSON.stringify(structured), (err) => {
   if (err) {
     console.error(err);
-    return;
+    process.exit(1);
   }
-  console.log("Wrote file");
+  console.log(`Wrote file ${inputType}.json`);
 });
 

@@ -18,8 +18,11 @@ const NavHeader = () => (
           <LinkContainer to="/places/us-state">
             <NavDropdown.Item eventKey={2.1}>US States</NavDropdown.Item>
           </LinkContainer>
+          <LinkContainer to="/places/canada-state">
+            <NavDropdown.Item eventKey={2.2}>Canadian Provinces</NavDropdown.Item>
+          </LinkContainer>
           <LinkContainer to="/places/country">
-            <NavDropdown.Item eventKey={2.2}>Countries</NavDropdown.Item>
+            <NavDropdown.Item eventKey={2.3}>Countries</NavDropdown.Item>
           </LinkContainer>
         </NavDropdown>
       </Nav>

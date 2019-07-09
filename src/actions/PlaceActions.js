@@ -10,7 +10,7 @@ export function placeClicked(place) {
 export function placeTypeChanged(placeType) {
   console.log("placeTypeChanged to ", placeType);
   return function (dispatch) {
-    axios.get(`${process.env.PUBLIC_URL}/data/${placeType}-converted.json`)
+    axios.get(`${process.env.PUBLIC_URL}/data/${placeType}.json`)
       .then(rsp => {
         console.log("Got data, placeType = ", placeType);
         dispatch(placeDataRetrieved(rsp.data, placeType));
