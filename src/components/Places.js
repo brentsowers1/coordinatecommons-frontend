@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import PlaceList from './PlaceList';
-import Map from '../containers/Map';
+import ActiveMap from '../containers/ActiveMap';
 import './Places.css';
 
 class Places extends Component {
@@ -20,7 +20,7 @@ class Places extends Component {
               onPlaceClick={this.props.onPlaceClick} />
           </Col>
           <Col sm={8} md={9} lg={9} xl={10} className="no-float">
-            <Map />
+            <ActiveMap />
           </Col>
         </Row>
       </Container>
