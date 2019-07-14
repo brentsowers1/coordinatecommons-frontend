@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import PlaceList from './PlaceList';
 import ActiveMap from '../containers/ActiveMap';
+import HighlightedPlaceInfo from '../containers/HighlightedPlaceInfo';
 import './Places.css';
 
 class Places extends Component {
@@ -21,6 +22,7 @@ class Places extends Component {
           </Col>
           <Col sm={8} md={9} lg={9} xl={10} className="no-float">
             <ActiveMap />
+            <HighlightedPlaceInfo />
           </Col>
         </Row>
       </Container>

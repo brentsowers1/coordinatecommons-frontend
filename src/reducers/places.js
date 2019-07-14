@@ -5,6 +5,7 @@ const initialState = {
     'country': []
   },
   selectedPlaceId: 'VA',
+  highlightedPlaceId: '',
   activePlaceType: 'us-state'
 }
 
