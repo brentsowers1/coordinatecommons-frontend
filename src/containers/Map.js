@@ -25,43 +25,47 @@ const Map = compose(
     zoom={5}
     center={props.center}
   >
-    {props.polygons.map(polygon => 
-      <Polygon
-        key={polygon.id}
-        path={polygon.coordinates}
-        options={{
-          strokeColor: "#000000",
-          strokeOpacity: 0.8,
-          strokeWeight: 2,
-          fillColor: "#111111",
-          fillOpacity: 0.1
-        }}
-      />
-    )}  
+    {props.places.map(place =>
+      place.polygons.map((polygon, index) =>
+        <Polygon
+          key={`${polygon.id}-${index}`}
+          path={polygon}
+          options={{
+            strokeColor: "#000000",
+            strokeOpacity: 0.8,
+            strokeWeight: 2,
+            fillColor: "#111111",
+            fillOpacity: 0.1
+          }}
+        />
+      ))}  
   </GoogleMap>
 ));
 
 const mapStateToProps = state => {
   const selectedPlace = getSelectedPlace(state);
-  const polygons = state.places.placeTypes && state.places.placeTypes[state.places.activePlaceType] ?
+  const places = state.places.placeTypes && state.places.placeTypes[state.places.activePlaceType] ?
     state.places.placeTypes[state.places.activePlaceType].map(place => {
       return {
         id: place.id,
-        coordinates: place.coordinates[0].map(polygonCoords => {
-          return {
-            lat: polygonCoords[1],
-            lng: polygonCoords[0]};
-          }
-        )
-      };
+        name: place.name,
+        polygons: place.coordinates.map(polygon => {
+          return polygon.map(polygonCoords => {
+            return {
+              lat: polygonCoords[1],
+              lng: polygonCoords[0]
+            };
+          })
+        })
+      }
     })
     : [];
-  console.log("polygons - ", polygons);
+  console.log("places - ", places);
   return {
     center: selectedPlace ? 
       getLatLng(selectedPlace.center) : 
       getLatLng([-98.5795, 39.8283]),
-    polygons: polygons
+    places: places
   };
 }
 
