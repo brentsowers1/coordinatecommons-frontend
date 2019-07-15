@@ -1,6 +1,7 @@
 import { connect } from "react-redux";
 import getSelectedPlace from '../reducers/getSelectedPlace';
 import getLatLng from '../reducers/getLatLng';
+import { newPlaceHighlighted } from '../actions/PlaceActions';
 import Map from '../components/Map';
 
 const mapStateToProps = state => {
@@ -30,4 +31,15 @@ const mapStateToProps = state => {
   };
 }
 
-export default connect(mapStateToProps)(Map);
+const mapDispatchToProps = dispatch => {
+  return {
+    mouseOverPlace: (polygonId) => {
+      dispatch(newPlaceHighlighted(polygonId));
+    },
+    mouseOutPlace: () => {
+      dispatch(newPlaceHighlighted(''));
+    }
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Map);

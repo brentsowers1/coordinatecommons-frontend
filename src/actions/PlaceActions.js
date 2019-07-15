@@ -30,3 +30,12 @@ function placeDataRetrieved(placeData, placeType) {
     }
   };
 }
+
+export function newPlaceHighlighted(placeId) {
+  return {
+    type: 'PLACE_HIGHLIGHTED',
+    payload: {
+      placeId
+    }
+  }
+}

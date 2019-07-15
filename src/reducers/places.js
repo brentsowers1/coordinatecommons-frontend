@@ -32,6 +32,11 @@ const places = (state=initialState, action) => {
         activePlaceType: action.payload.placeType,
         placeTypes: placeTypes
       };
+    case 'PLACE_HIGHLIGHTED':
+      return {
+        ...state,
+        highlightedPlaceId: action.payload.placeId
+      }
     default:
       return state;
   }

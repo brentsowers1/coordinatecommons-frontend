@@ -27,6 +27,7 @@ const Map = compose(
         <Polygon
           key={`${polygon.id}-${index}`}
           path={polygon}
+          //onMouseOver={props.mouseOverPlace(polygon.id)}
           options={{
             strokeColor: "#000000",
             strokeOpacity: 0.8,
