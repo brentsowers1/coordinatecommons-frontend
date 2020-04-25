@@ -10,16 +10,19 @@ class PlaceInfo extends Component {
 
   render() {
     return (
-      <Container>
-        <Row>
-          <Col md={7}>
-            {this.props.name}
-          </Col>
-          <Col md={5}>
-            {this.props.status}
-          </Col>
-        </Row>
-      </Container>      
+      <React.Fragment>
+        {this.props.name}, {this.props.status}  
+      </React.Fragment>
+      // <Container>
+      //   <Row>
+      //     <Col md={7}>
+      //       {this.props.name}
+      //     </Col>
+      //     <Col md={5}>
+      //       {this.props.status}
+      //     </Col>
+      //   </Row>
+      // </Container>      
     );
   } 
 };

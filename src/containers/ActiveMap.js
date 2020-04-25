@@ -2,6 +2,7 @@ import { connect } from "react-redux";
 import getSelectedPlace from '../reducers/getSelectedPlace';
 import getLatLng from '../reducers/getLatLng';
 import { newPlaceHighlighted } from '../actions/PlaceActions';
+import { mouseMoved } from '../actions/MapActions';
 import Map from '../components/Map';
 
 const mapStateToProps = state => {
@@ -22,7 +23,6 @@ const mapStateToProps = state => {
       }
     })
     : [];
-  console.log("places - ", places);
   return {
     center: selectedPlace ? 
       getLatLng(selectedPlace.center) : 
@@ -38,6 +38,10 @@ const mapDispatchToProps = dispatch => {
     },
     mouseOutPlace: () => {
       dispatch(newPlaceHighlighted(''));
+    },
+    mapMouseMoved: (event) => {
+      console.log("Got mouse mouse");
+      dispatch(mouseMoved(event.latLng));
     }
   }
 }

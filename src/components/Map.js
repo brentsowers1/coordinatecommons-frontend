@@ -21,6 +21,7 @@ const Map = compose(
   <GoogleMap
     zoom={5}
     center={props.center}
+    onMouseMove={props.mapMouseMoved}
   >
     {props.places.map(place =>
       place.polygons.map((polygon, index) =>

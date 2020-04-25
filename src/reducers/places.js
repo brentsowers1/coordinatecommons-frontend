@@ -6,7 +6,8 @@ const initialState = {
   },
   selectedPlaceId: 'VA',
   highlightedPlaceId: '',
-  activePlaceType: 'us-state'
+  activePlaceType: 'us-state',
+  mouseLocation: {lat: 0, lng: 0}
 }
 
 const places = (state=initialState, action) => {
@@ -36,6 +37,14 @@ const places = (state=initialState, action) => {
       return {
         ...state,
         highlightedPlaceId: action.payload.placeId
+      }
+    case 'MOUSE_MOVED':
+      return {
+        ...state,
+        mouseLocation: {
+          lat: action.payload.lat,
+          lng: action.payload.lng
+        }
       }
     default:
       return state;
