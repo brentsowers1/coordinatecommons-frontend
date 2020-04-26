@@ -5,7 +5,8 @@ import PropTypes from 'prop-types';
 class PlaceList extends Component {
   static propTypes = {
     placeType: PropTypes.string.isRequired,
-    places: PropTypes.array.isRequired
+    places: PropTypes.array.isRequired,
+    onPlaceClick: PropTypes.func
   }
 
   constructor(props) {
@@ -17,6 +18,9 @@ class PlaceList extends Component {
 
   onPlaceClick(place) {
     this.setState({selectedPlaceId: place.id});
+    if (this.props.onPlaceClick) {
+      this.props.onPlaceClick(place)
+    }
   }
 
   componentDidUpdate(prevProps, prevState) {
