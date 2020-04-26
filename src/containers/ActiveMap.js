@@ -1,4 +1,4 @@
-import { connect } from "react-redux";
+/*import { connect } from "react-redux";
 import getSelectedPlace from '../reducers/getSelectedPlace';
 import getLatLng from '../reducers/getLatLng';
 import { newPlaceHighlighted } from '../actions/PlaceActions';
@@ -47,3 +47,4 @@ const mapDispatchToProps = dispatch => {
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Map);
+*/

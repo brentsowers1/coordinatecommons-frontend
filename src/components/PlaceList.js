@@ -4,9 +4,25 @@ import PropTypes from 'prop-types';
 
 class PlaceList extends Component {
   static propTypes = {
-    places: PropTypes.array.isRequired,
-    selectedPlaceId: PropTypes.string,
-    onPlaceClick: PropTypes.func.isRequired
+    placeType: PropTypes.string.isRequired,
+    places: PropTypes.array.isRequired
+  }
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      selectedPlaceId: null
+    }
+  }
+
+  onPlaceClick(place) {
+    this.setState({selectedPlaceId: place.id});
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevProps.placeType !== this.props.placeType) {
+      this.setState({selectedPlaceId: null});
+    }
   }
 
   render() {
@@ -14,11 +30,11 @@ class PlaceList extends Component {
       <ListGroup>
         {this.props.places.map(place =>
           <ListGroup.Item
-            action={place.id !== this.props.selectedPlaceId}
+            action={place.id !== this.state.selectedPlaceId}
             key={place.id}
             eventKey={place.id}
-            active={place.id === this.props.selectedPlaceId}
-            onClick={() => this.props.onPlaceClick(place)}>
+            active={place.id === this.state.selectedPlaceId}
+            onClick={() => this.onPlaceClick(place)}>
             {place.name}
           </ListGroup.Item>
         )}

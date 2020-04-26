@@ -1,14 +1,44 @@
 import React, { Component } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import PlaceList from './PlaceList';
-import ActiveMap from '../containers/ActiveMap';
-import HighlightedPlaceInfo from '../containers/HighlightedPlaceInfo';
-import MousePosition from '../containers/MousePosition';
 import './Places.css';
+import axios from 'axios';
 
 class Places extends Component {
-  componentWillMount() {
-    this.props.placeTypeChanged(this.props.activePlaceType);
+  constructor(props) {
+    super(props);
+    this.state = {
+      places: [],
+      placeType: props.match.params.placeType ? props.match.params.placeType : 'us-state'
+    };
+  }
+
+  componentDidMount() {
+    this.getPlaces();
+  }
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (nextProps.match.params.placeType && nextProps.match.params.placeType !== prevState.placeType) {
+      return {placeType: nextProps.match.params.placeType}
+    }
+    return null;
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.placeType !== this.state.placeType) {
+      this.getPlaces();
+    }
+  }
+
+  getPlaces() {
+    axios.get(`${process.env.PUBLIC_URL}/data/${this.state.placeType}.json`)
+      .then(rsp => {
+        console.log("Got data, placeType = ", this.state.placeType);
+        this.setState({places: rsp.data});
+      })
+      .catch(err => {
+        console.log(`Error getting place data ${this.state.placeType}`, err);
+      })
   }
 
   render() {
@@ -17,14 +47,14 @@ class Places extends Component {
         <Row>
           <Col sm={4} md={3} lg={3} xl={2} className="no-float">
             <PlaceList
-              places={this.props.places}
-              selectedPlaceId={this.props.selectedPlaceId}
-              onPlaceClick={this.props.onPlaceClick} />
+              places={this.state.places}
+              placeType={this.state.placeType}
+            />
           </Col>
           <Col sm={8} md={9} lg={9} xl={10} className="no-float">
-            <ActiveMap />
+            {/* <ActiveMap />
             <HighlightedPlaceInfo />
-            <MousePosition />
+            <MousePosition /> */}
           </Col>
         </Row>
       </Container>

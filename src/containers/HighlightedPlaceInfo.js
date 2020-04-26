@@ -1,4 +1,4 @@
-import { connect } from 'react-redux';
+/*import { connect } from 'react-redux';
 import getHighlightedPlace from '../reducers/getHighlightedPlace';
 import PlaceInfo from '../components/PlaceInfo';
 
@@ -11,3 +11,4 @@ const mapStateToProps = state => {
 }
 
 export default connect(mapStateToProps)(PlaceInfo);
+*/

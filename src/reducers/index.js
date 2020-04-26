@@ -1,4 +1,4 @@
-import { combineReducers } from 'redux';
+/*import { combineReducers } from 'redux';
 import places from './places';
 
 const coordinateCommonsApp = combineReducers({
@@ -6,3 +6,4 @@ const coordinateCommonsApp = combineReducers({
 });
 
 export default coordinateCommonsApp;
+*/

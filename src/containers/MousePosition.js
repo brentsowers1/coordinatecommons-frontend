@@ -1,4 +1,4 @@
-import { connect } from 'react-redux';
+/*import { connect } from 'react-redux';
 import MousePosition from '../components/MousePosition';
 
 const mapStateToProps = state => {
@@ -9,3 +9,4 @@ const mapStateToProps = state => {
 }
 
 export default connect(mapStateToProps)(MousePosition);
+*/

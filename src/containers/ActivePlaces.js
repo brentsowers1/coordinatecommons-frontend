@@ -1,4 +1,4 @@
-import { connect } from 'react-redux';
+/*import { connect } from 'react-redux';
 import Places from '../components/Places';
 import { placeTypeChanged, placeClicked } from '../actions/PlaceActions';
 
@@ -31,3 +31,4 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 const ActivePlaces = connect(mapStateToProps, mapDispatchToProps)(Places);
 
 export default ActivePlaces;
+*/

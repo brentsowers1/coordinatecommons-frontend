@@ -1,4 +1,4 @@
-import React from "react";
+/*import React from "react";
 import {
   withScriptjs,
   withGoogleMap,
@@ -42,3 +42,4 @@ const Map = compose(
 ));
 
 export default Map;
+*/
