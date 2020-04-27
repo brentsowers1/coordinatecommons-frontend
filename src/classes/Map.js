@@ -2,64 +2,59 @@ import loadJs from '../util/loadJs';
 
 export default class Map {
   constructor(mapContainerId) {
-    // Since the google load map function is globally called as a callback without knowledge of this Map class, we have
-    // to keep track of all of our instances in a global array so that way when the load callback happens, we know
-    // which class instance to use to store local variables. This allows any number of these map classes to be
-    // initialized
-    if (!window.googleMapInstances) {
-      window.googleMapInstances = [];
+    // This is necessary so that we can have any number of map instances
+    if (window.googleMapInstanceCounter) {
+      window.googleMapInstanceCounter++;
+    } else {
+      window.googleMapInstanceCounter = 1;
     }
-    window.googleMapInstances.push(this);
 
-    this.instanceNumber = window.googleMapInstances.length - 1;
     this.googleMap = null;
     this.places = [];
     this.mapContainerId = mapContainerId;
 
+    const baseUrl = 'https://maps.googleapis.com/maps/api/js';
+    const mapKey = 'AIzaSyDRY1U5VsSThTsCbLZm0AeH-j5xCfuAewc'; 
+
     // When initializing the map, we need to know what the instance number is, and what map container to load the map
-    // in. So bind these values to the function that the google callback will call.
-    window[`initMap${this.instanceNumber}`] = this.initMap.bind(this, null, this.mapContainerId, this.instanceNumber);
+    // in. So bind the 'this' value when this callback is executed to the 'this' value right now (this instance of
+    // the class)
+    window[`initMap${window.googleMapInstanceCounter}`] = this.initMap.bind(this, null);
     if (window.google && window.google.maps) {
       // And all that for nothing if the google maps Javascript code is already loaded... None of this would be necessary
       // if the script is loaded synchronously.
       this.initMap(this.places, this.mapContainerId);
     } else {
-      loadJs(`https://maps.googleapis.com/maps/api/js?key=AIzaSyDRY1U5VsSThTsCbLZm0AeH-j5xCfuAewc&callback=initMap${this.instanceNumber}`)
+      loadJs(`${baseUrl}?key=${mapKey}&callback=initMap${window.googleMapInstanceCounter}`);
     }
   }
 
   // This probably is not necessary, but just incase, explicitly set the global variables to null
   destroy() {
-    window.googleMapInstances[this.instanceNumber] = null;
     window[`initMap${this.instanceNumber}`] = null;    
   }
 
-  initMap(places, mapContainerId, globalOffsetInstanceToUse) {
-    // This function can EITHER get called explicitly on an instance of this Map class, or as a Google callback when 
-    // the Javascript loads. If it's called from the callback, "this" will be window, not the class. We store all
-    // created instances of this class in window.googleMapInstances, and when this is called as a callback, the 
-    // globalOffset variable is bound. If it's called directly on an instance of the Map class, then nothing special
-    // needs to be done.
-    const correctThis = globalOffsetInstanceToUse === undefined ? this : window.googleMapInstances[globalOffsetInstanceToUse];
-    debugger
+  initMap(places) {
+    // initMap will get called twice - once on the google maps callback after the script is loaded, and when the React
+    // component that includes this class is mounted. places will only be set on the React component's mount, but, when that
+    // is mounted, the google Javascript MAY not be loaded. 
     if (places) {
-      correctThis.places = places;
+      this.places = places;
     }
     if (window.google && window.google.maps) {
-      correctThis.googleMap = new window.google.maps.Map(document.getElementById(mapContainerId), {
-        center: {lat: 39.8283, lng: -98.5795},
+      this.googleMap = new window.google.maps.Map(document.getElementById(this.mapContainerId), {
+        center: { lat: 39.8283, lng: -98.5795 },
         zoom: 5
       });
-      correctThis.loadPlacesOnMap(correctThis.places);
+      this.loadPlacesOnMap(this.places);
     }
   }
   
   loadPlacesOnMap(places) {
     this.places = places;
-    console.log('loading places');
   }
   
-  setMapCenter(place) {
+  setCenter(place) {
     this.googleMap.setCenter(getLatLng(place.center));
   }
   

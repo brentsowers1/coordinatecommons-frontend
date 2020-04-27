@@ -17,7 +17,7 @@ class Places extends Component {
 
   componentDidMount() {
     this.getPlaces();
-    this.map.initMap(this.state.places, 'map');
+    this.map.initMap(this.state.places);
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
@@ -55,7 +55,7 @@ class Places extends Component {
             <PlaceList
               places={this.state.places}
               placeType={this.state.placeType}
-              onPlaceClick={this.onPlaceClick}
+              onPlaceClick={(place) => this.onPlaceClick(place)}
             />
           </Col>
           <Col sm={8} md={9} lg={9} xl={10} className="no-float">
