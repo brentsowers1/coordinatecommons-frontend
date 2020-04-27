@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import PlaceList from './PlaceList';
-import getLatLng from '../actions/getLatLng';
 import './Places.css';
 import axios from 'axios';
-import loadJs from '../actions/loadJs';
+import Map from '../classes/Map';
 
 class Places extends Component {
   constructor(props) {
@@ -13,17 +12,17 @@ class Places extends Component {
       places: [],
       placeType: props.match.params.placeType ? props.match.params.placeType : 'us-state'
     };
+    this.map = new Map('map');
   }
 
   componentDidMount() {
     this.getPlaces();
-    window.initMap = this.initMap;
-    loadJs('https://maps.googleapis.com/maps/api/js?key=AIzaSyDRY1U5VsSThTsCbLZm0AeH-j5xCfuAewc&callback=initMap')    
+    this.map.initMap(this.state.places, 'map');
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
     if (nextProps.match.params.placeType && nextProps.match.params.placeType !== prevState.placeType) {
-      return {placeType: nextProps.match.params.placeType}
+      return { placeType: nextProps.match.params.placeType }
     }
     return null;
   }
@@ -37,22 +36,15 @@ class Places extends Component {
   getPlaces() {
     axios.get(`${process.env.PUBLIC_URL}/data/${this.state.placeType}.json`)
       .then(rsp => {
-        this.setState({places: rsp.data});
+        this.setState({places: rsp.data}, () => this.map.loadPlacesOnMap(this.state.places));
       })
       .catch(err => {
         console.log(`Error getting place data ${this.state.placeType}`, err);
       })
   }
 
-  initMap() {
-    window.map = new window.google.maps.Map(document.getElementById('map'), {
-      center: {lat: 39.8283, lng: -98.5795},
-      zoom: 5
-    });
-  }
-
   onPlaceClick(place) {
-    window.map.setCenter(getLatLng(place.center));
+    this.map.setCenter(place);
   }
 
   render() {
