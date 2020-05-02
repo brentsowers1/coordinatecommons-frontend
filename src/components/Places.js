@@ -70,9 +70,6 @@ class Places extends Component {
             <div style={{ height: '500px'}}>
               <div style={{ height: '100%' }} id='map'></div>
             </div>                  
-            {/* <ActiveMap />
-            <HighlightedPlaceInfo />
-            <MousePosition /> */}
           </Col>
         </Row>
       </Container>
