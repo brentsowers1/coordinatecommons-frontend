@@ -10,9 +10,15 @@ class Places extends Component {
     super(props);
     this.state = {
       places: [],
-      placeType: props.match.params.placeType ? props.match.params.placeType : 'us-state'
+      placeType: props.match.params.placeType ? props.match.params.placeType : 'us-state',
+      mouseOverPlace: null
     };
-    this.map = new Map('map', this.getGeoJsonUrl());
+    const callbacks = {
+      onMouseOver: this.onMapPolygonMouseOver.bind(this),
+      onMouseOut: this.onMapPolygonMouseOut.bind(this),
+      onClick: this.onMapPolygonClick.bind(this)
+    };
+    this.map = new Map('map', this.getGeoJsonUrl(), callbacks);
   }
 
   componentDidMount() {
@@ -55,6 +61,22 @@ class Places extends Component {
     this.map.setCenter(place);
   }
 
+  onMapPolygonMouseOver(id) {
+    this.setState({mouseOverPlace: this.getPlaceFromId(id)});
+  }
+
+  onMapPolygonMouseOut(id) {
+    
+  }
+
+  onMapPolygonClick(id) {
+
+  }
+
+  getPlaceFromId(id) {
+    return this.state.places.find(p => p.id === id);
+  }
+
   render() {
     return (
       <Container>
@@ -69,7 +91,10 @@ class Places extends Component {
           <Col sm={8} md={9} lg={9} xl={10} className="no-float">
             <div style={{ height: '500px'}}>
               <div style={{ height: '100%' }} id='map'></div>
-            </div>                  
+            </div>  
+            <div>
+              {this.state.mouseOverPlace? this.state.mouseOverPlace.name : ''}
+            </div>                
           </Col>
         </Row>
       </Container>
