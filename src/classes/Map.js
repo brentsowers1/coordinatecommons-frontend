@@ -1,7 +1,7 @@
 import loadJs from '../util/loadJs';
 
 export default class Map {
-  constructor(mapContainerId, geoJsonUrl) {
+  constructor(mapContainerId, geoJsonUrl, callbacks) {
     // This is necessary so that we can have any number of map instances
     if (window.googleMapInstanceCounter) {
       window.googleMapInstanceCounter++;
@@ -12,6 +12,7 @@ export default class Map {
     this.googleMap = null;
     this.geoJsonUrl = geoJsonUrl;
     this.mapContainerId = mapContainerId;
+    this.callbacks = callbacks;
 
     const baseUrl = 'https://maps.googleapis.com/maps/api/js';
     const mapKey = 'AIzaSyDRY1U5VsSThTsCbLZm0AeH-j5xCfuAewc'; 
@@ -47,6 +48,25 @@ export default class Map {
         zoom: 5
       });
       this.googleMap.data.loadGeoJson(this.geoJsonUrl);
+      this.googleMap.data.setStyle(setFeatureStyle);
+      this.googleMap.data.addListener('click', (event) => {
+        event.feature.setProperty('clicked', !event.feature.getProperty('clicked'));
+        if (this.callbacks && this.callbacks.onClick) {
+          this.callbacks.onClick(event.feature.getProperty('id'));
+        }
+      });
+      this.googleMap.data.addListener('mouseover', (event) => {
+        event.feature.setProperty('mousedOver', true);
+        if (this.callbacks && this.callbacks.onMouseOver) {
+          this.callbacks.onMouseOver(event.feature.getProperty('id'));
+        }
+      });
+      this.googleMap.data.addListener('mouseout', (event) => {
+        event.feature.setProperty('mousedOver', false);
+        if (this.callbacks && this.callbacks.onMouseOver) {
+          this.callbacks.onMouseOut(event.feature.getProperty('id'));
+        }
+      });
     }
   }
   
@@ -58,7 +78,19 @@ export default class Map {
   
 }
 
-const getLatLng = function (lngLatArray) {
+const setFeatureStyle = (feature) => {
+  const fillColor = feature.getProperty('clicked') ? '#11FF11' : '#AAAAAA';
+  const strokeWeight = feature.getProperty('mousedOver') ? 5 : 2;
+  return {
+    strokeColor: "#000000",
+    strokeOpacity: 0.8,
+    strokeWeight,
+    fillColor,
+    fillOpacity: 0.25    
+  };
+}
+
+const getLatLng = (lngLatArray) => {
   return {
     lat: lngLatArray[1], 
     lng: lngLatArray[0]
