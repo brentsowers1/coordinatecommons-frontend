@@ -12,12 +12,11 @@ class Places extends Component {
       places: [],
       placeType: props.match.params.placeType ? props.match.params.placeType : 'us-state'
     };
-    this.map = new Map('map');
+    this.map = new Map('map', this.getGeoJsonUrl());
   }
 
   componentDidMount() {
-    this.getPlaces();
-    this.map.initMap(this.state.places);
+    this.getPlacesAndInitMap();
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
@@ -29,18 +28,27 @@ class Places extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.placeType !== this.state.placeType) {
-      this.getPlaces();
+      this.getPlacesAndInitMap();
     }
   }
 
-  getPlaces() {
-    axios.get(`${process.env.PUBLIC_URL}/data/${this.state.placeType}.json`)
-      .then(rsp => {
-        this.setState({places: rsp.data}, () => this.map.loadPlacesOnMap(this.state.places));
+  getDataBaseUrl() {
+    return `${process.env.PUBLIC_URL}/data/${this.state.placeType}`;
+  }
+
+
+  getGeoJsonUrl() {
+    return `${this.getDataBaseUrl()}-medium-geojson.json`;
+  }
+
+  getPlacesAndInitMap() {
+    axios.get(`${this.getDataBaseUrl()}-medium-data.json`).then(rsp => {
+        this.setState({places: rsp.data});
       })
       .catch(err => {
         console.log(`Error getting place data ${this.state.placeType}`, err);
-      })
+      });
+    this.map.initMap(this.getGeoJsonUrl());
   }
 
   onPlaceClick(place) {

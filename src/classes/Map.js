@@ -1,7 +1,7 @@
 import loadJs from '../util/loadJs';
 
 export default class Map {
-  constructor(mapContainerId) {
+  constructor(mapContainerId, geoJsonUrl) {
     // This is necessary so that we can have any number of map instances
     if (window.googleMapInstanceCounter) {
       window.googleMapInstanceCounter++;
@@ -10,7 +10,7 @@ export default class Map {
     }
 
     this.googleMap = null;
-    this.places = [];
+    this.geoJsonUrl = geoJsonUrl;
     this.mapContainerId = mapContainerId;
 
     const baseUrl = 'https://maps.googleapis.com/maps/api/js';
@@ -23,7 +23,7 @@ export default class Map {
     if (window.google && window.google.maps) {
       // And all that for nothing if the google maps Javascript code is already loaded... None of this would be necessary
       // if the script is loaded synchronously.
-      this.initMap(this.places, this.mapContainerId);
+      this.initMap();
     } else {
       loadJs(`${baseUrl}?key=${mapKey}&callback=initMap${window.googleMapInstanceCounter}`);
     }
@@ -34,28 +34,26 @@ export default class Map {
     window[`initMap${this.instanceNumber}`] = null;    
   }
 
-  initMap(places) {
+  initMap(geoJsonUrl) {
+    if (geoJsonUrl) {
+      this.geoJsonUrl = geoJsonUrl;
+    }
     // initMap will get called twice - once on the google maps callback after the script is loaded, and when the React
     // component that includes this class is mounted. places will only be set on the React component's mount, but, when that
     // is mounted, the google Javascript MAY not be loaded. 
-    if (places) {
-      this.places = places;
-    }
     if (window.google && window.google.maps) {
       this.googleMap = new window.google.maps.Map(document.getElementById(this.mapContainerId), {
         center: { lat: 39.8283, lng: -98.5795 },
         zoom: 5
       });
-      this.loadPlacesOnMap(this.places);
+      this.googleMap.data.loadGeoJson(this.geoJsonUrl);
     }
   }
   
-  loadPlacesOnMap(places) {
-    this.places = places;
-  }
-  
   setCenter(place) {
-    this.googleMap.setCenter(getLatLng(place.center));
+    if (this.googleMap) {
+      this.googleMap.setCenter(getLatLng(place.center));
+    }
   }
   
 }
