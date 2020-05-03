@@ -67,15 +67,19 @@ class Places extends Component {
   }
 
   onMapPolygonMouseOut(id) {
-    
+    this.setState({mouseOverPlace: null});
   }
 
   onMapPolygonClick(id) {
-
+    const newPlaces = [...this.state.places];
+    const foundPlace = newPlaces.find(p => p.id === id);
+    if (foundPlace) foundPlace.selected = !foundPlace.selected;
+    this.setState({places: newPlaces});
+    this.map.toggleFeatureSelected(id);
   }
 
   onMapInitialized() {
-    this.map.setFeatureClicked('AL');
+
   }
 
   getPlaceFromId(id) {
@@ -98,8 +102,11 @@ class Places extends Component {
               <div style={{ height: '100%' }} id='map'></div>
             </div>  
             <div>
-              {this.state.mouseOverPlace? this.state.mouseOverPlace.name : ''}
-            </div>                
+              Moused over place - {this.state.mouseOverPlace ? this.state.mouseOverPlace.name : ''}
+            </div>
+            <div>
+              Selected places: {this.state.places.filter(p => p.selected).map(p => p.name).join(', ')}
+            </div>
           </Col>
         </Row>
       </Container>

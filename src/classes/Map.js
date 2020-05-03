@@ -54,28 +54,32 @@ export default class Map {
       });
       this.googleMap.data.setStyle(setFeatureStyle);
       this.googleMap.data.addListener('click', (event) => {
-        event.feature.setProperty('clicked', !event.feature.getProperty('clicked'));
         if (this.callbacks && this.callbacks.onClick) {
-          this.callbacks.onClick(event.feature.getProperty('id'));
+          this.callbacks.onClick(event.feature.getId());
         }
       });
       this.googleMap.data.addListener('mouseover', (event) => {
         event.feature.setProperty('mousedOver', true);
         if (this.callbacks && this.callbacks.onMouseOver) {
-          this.callbacks.onMouseOver(event.feature.getProperty('id'));
+          this.callbacks.onMouseOver(event.feature.getId());
         }
       });
       this.googleMap.data.addListener('mouseout', (event) => {
         event.feature.setProperty('mousedOver', false);
         if (this.callbacks && this.callbacks.onMouseOver) {
-          this.callbacks.onMouseOut(event.feature.getProperty('id'));
+          this.callbacks.onMouseOut(event.feature.getId());
         }
       });
     }
   }
 
-  setFeatureClicked(featureId) {
-
+  toggleFeatureSelected(featureId) {
+    if (this.googleMap) {
+      const mapFeature = this.googleMap.data.getFeatureById(featureId);
+      if (mapFeature) {
+        mapFeature.setProperty('selected', !mapFeature.getProperty('selected'));
+      }
+    }
   }
   
   setCenter(place) {
@@ -87,7 +91,7 @@ export default class Map {
 }
 
 const setFeatureStyle = (feature) => {
-  const fillColor = feature.getProperty('clicked') ? '#11FF11' : '#AAAAAA';
+  const fillColor = feature.getProperty('selected') ? '#11FF11' : '#AAAAAA';
   const strokeWeight = feature.getProperty('mousedOver') ? 5 : 2;
   return {
     strokeColor: "#000000",
