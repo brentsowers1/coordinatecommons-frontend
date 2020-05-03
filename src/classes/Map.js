@@ -47,7 +47,11 @@ export default class Map {
         center: { lat: 39.8283, lng: -98.5795 },
         zoom: 5
       });
-      this.googleMap.data.loadGeoJson(this.geoJsonUrl);
+      this.googleMap.data.loadGeoJson(this.geoJsonUrl, null, (features) => {
+        if (this.callbacks.onMapInitialized) {
+          this.callbacks.onMapInitialized();
+        }
+      });
       this.googleMap.data.setStyle(setFeatureStyle);
       this.googleMap.data.addListener('click', (event) => {
         event.feature.setProperty('clicked', !event.feature.getProperty('clicked'));
@@ -68,6 +72,10 @@ export default class Map {
         }
       });
     }
+  }
+
+  setFeatureClicked(featureId) {
+
   }
   
   setCenter(place) {

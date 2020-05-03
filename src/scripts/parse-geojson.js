@@ -104,8 +104,8 @@ const geoJsonFeaturesParsed = rawGeoJsonItems.map(item => {
   }
   return {
     type: 'Feature',
+    id,
     properties: {
-      id
     },
     geometry: {
       type: featureType,

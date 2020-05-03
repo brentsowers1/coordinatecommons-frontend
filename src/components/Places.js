@@ -16,7 +16,8 @@ class Places extends Component {
     const callbacks = {
       onMouseOver: this.onMapPolygonMouseOver.bind(this),
       onMouseOut: this.onMapPolygonMouseOut.bind(this),
-      onClick: this.onMapPolygonClick.bind(this)
+      onClick: this.onMapPolygonClick.bind(this),
+      onMapInitialized: this.onMapInitialized.bind(this)
     };
     this.map = new Map('map', this.getGeoJsonUrl(), callbacks);
   }
@@ -71,6 +72,10 @@ class Places extends Component {
 
   onMapPolygonClick(id) {
 
+  }
+
+  onMapInitialized() {
+    this.map.setFeatureClicked('AL');
   }
 
   getPlaceFromId(id) {
