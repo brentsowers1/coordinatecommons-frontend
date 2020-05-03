@@ -48,7 +48,7 @@ class Places extends Component {
   }
 
   getPlacesAndInitMap() {
-    axios.get(`${this.getDataBaseUrl()}-medium-data.json`).then(rsp => {
+    axios.get(`${this.getDataBaseUrl()}-data.json`).then(rsp => {
         this.setState({places: rsp.data});
       })
       .catch(err => {

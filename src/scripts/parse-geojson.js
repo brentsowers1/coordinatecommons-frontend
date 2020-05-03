@@ -76,7 +76,7 @@ const featureDataStructured = rawGeoJsonItems.map(item => {
     center
   };
 
-});
+}).sort((a, b) => a.name ? a.name.localeCompare(b.name) : 0);
 
 const cutCoordinatePrecision = (coordinate) => {
   const lon = parseFloat(coordinate[0].toFixed(4));
@@ -119,19 +119,21 @@ const geoJsonParsed = {
   features: geoJsonFeaturesParsed
 }
 
-fs.writeFile(`../../public/data/${inputType}-${precision}-data.json`, JSON.stringify(featureDataStructured), (err) => {
-  if (err) {
-    console.error(err);
-    process.exit(1);
-  }
-  console.log(`Wrote file ${inputType}-data.json`);
-});
+if (precision === 'large') {
+  fs.writeFile(`../../public/data/${inputType}-data.json`, JSON.stringify(featureDataStructured), (err) => {
+    if (err) {
+      console.error(err);
+      process.exit(1);
+    }
+    console.log(`Wrote file ${inputType}-data.json`);
+  });  
+}
 
 fs.writeFile(`../../public/data/${inputType}-${precision}-geojson.json`, JSON.stringify(geoJsonParsed), (err) => {
   if (err) {
     console.error(err);
     process.exit(1);
   }
-  console.log(`Wrote file ${inputType}-geojson.json`);
+  console.log(`Wrote file ${inputType}-${precision}-geojson.json`);
 })
 
