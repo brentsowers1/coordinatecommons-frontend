@@ -73,7 +73,7 @@ class Places extends Component {
   onMapPolygonClick(id) {
     const newPlaces = [...this.state.places];
     const foundPlace = newPlaces.find(p => p.id === id);
-    if (foundPlace) foundPlace.selected = !foundPlace.selected;
+    if (foundPlace) foundPlace.visited = !foundPlace.visited;
     this.setState({places: newPlaces});
     this.map.toggleFeatureSelected(id);
   }
@@ -86,28 +86,44 @@ class Places extends Component {
     return this.state.places.find(p => p.id === id);
   }
 
+  getPlaceTypeName() {
+    switch (this.state.placeType) {
+      case 'us-state':
+        return 'US States';
+      case 'canada-state':
+        return 'Canadian Provinces';
+      case 'mexico-state':
+        return 'Mexican States';
+      case 'country':
+        return 'Countries';
+    }
+  }
+
   render() {
     return (
       <Container>
         <Row>
-          <Col sm={4} md={3} lg={3} xl={2} className="no-float">
-            <PlaceList
-              places={this.state.places}
-              placeType={this.state.placeType}
-              onPlaceClick={(place) => this.onPlaceClick(place)}
-            />
+          <Col>
+            {this.getPlaceTypeName()}
           </Col>
-          <Col sm={8} md={9} lg={9} xl={10} className="no-float">
+        </Row>
+        <Row>
+          <Col sm={12} md={12} lg={12} xl={12} className="no-float">
             <div style={{ height: '500px'}}>
               <div style={{ height: '100%' }} id='map'></div>
             </div>  
             <div>
-              Moused over place - {this.state.mouseOverPlace ? this.state.mouseOverPlace.name : ''}
-            </div>
-            <div>
-              Selected places: {this.state.places.filter(p => p.selected).map(p => p.name).join(', ')}
+              {this.state.mouseOverPlace ? this.state.mouseOverPlace.name : ''}&nbsp;
             </div>
           </Col>
+        </Row>
+        <Row>
+          <Col sm={12} md={12} lg={12} xl={12} className="no-float">
+            <PlaceList
+              places={this.state.places}
+              placeType={this.state.placeType}
+            />
+          </Col>          
         </Row>
       </Container>
     );
