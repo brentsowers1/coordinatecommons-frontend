@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
-import { ListGroup } from 'react-bootstrap';
 import PropTypes from 'prop-types';
 import printPercent from '../util/printPercent';
-import getPlaceTypeName from '../util/getPlaceTypeName';
+import { getPlaceTypeLastWord } from '../util/place-type-name-utils';
 import { Container, Row, Col } from 'react-bootstrap';
 
 class PlaceList extends Component {
@@ -18,13 +17,6 @@ class PlaceList extends Component {
     }
   }
 
-  // onPlaceClick(place) {
-  //   this.setState({selectedPlaceId: place.id});
-  //   if (this.props.onPlaceClick) {
-  //     this.props.onPlaceClick(place)
-  //   }
-  // }
-
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.placeType !== this.props.placeType) {
       this.setState({selectedPlaceId: null});
@@ -36,7 +28,7 @@ class PlaceList extends Component {
   }
 
   render() {
-    const placeTypeName = getPlaceTypeName(this.props.placeType);
+    const placeTypeName = getPlaceTypeLastWord(this.props.placeType);
     return (
       <Container>
         <Row>
@@ -66,18 +58,6 @@ class PlaceList extends Component {
           </Col>
         </Row>
       </Container>
-      // <ListGroup>
-      //   {this.props.places.map(place =>
-      //     <ListGroup.Item
-      //       action={place.id !== this.state.selectedPlaceId}
-      //       key={place.id}
-      //       eventKey={place.id}
-      //       active={place.id === this.state.selectedPlaceId}
-      //       onClick={() => this.onPlaceClick(place)}>
-      //       {place.name}
-      //     </ListGroup.Item>
-      //   )}
-      // </ListGroup>
     )
   }
 }

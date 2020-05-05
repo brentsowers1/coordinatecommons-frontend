@@ -4,6 +4,7 @@ import PlaceList from './PlaceList';
 import './Places.css';
 import axios from 'axios';
 import Map from '../classes/Map';
+import { getFullProperPlaceType } from '../util/place-type-name-utils';
 
 class Places extends Component {
   constructor(props) {
@@ -86,25 +87,12 @@ class Places extends Component {
     return this.state.places.find(p => p.id === id);
   }
 
-  getPlaceTypeName() {
-    switch (this.state.placeType) {
-      case 'us-state':
-        return 'US States';
-      case 'canada-state':
-        return 'Canadian Provinces';
-      case 'mexico-state':
-        return 'Mexican States';
-      case 'country':
-        return 'Countries';
-    }
-  }
-
   render() {
     return (
       <Container>
         <Row>
           <Col>
-            {this.getPlaceTypeName()}
+            {getFullProperPlaceType(this.state.placeType)}
           </Col>
         </Row>
         <Row>
