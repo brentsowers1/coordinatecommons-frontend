@@ -1,36 +1,43 @@
 import React from 'react';
 import { Container, Nav, NavDropdown, Navbar } from 'react-bootstrap';
-import { Link } from "react-router-dom";
-import { LinkContainer } from 'react-router-bootstrap';
+import { Link, useHistory } from "react-router-dom";
 
-const NavHeader = () => (
-  <Navbar>
-    <Container>
-      <Navbar.Brand>
-        <Link to="/">Coordinate Commons</Link>
-      </Navbar.Brand>
-      <Navbar.Toggle />
-      <Nav>
-        <LinkContainer to="/about">
-          <Nav.Item>About</Nav.Item>
-        </LinkContainer>
-        <LinkContainer to="/mypage">
-          <Nav.Item>My Page</Nav.Item>
-        </LinkContainer>
-        <NavDropdown title="Places" id="places-dropdown">
-          <LinkContainer to="/places/us-state">
-            <NavDropdown.Item eventKey={2.1}>US States</NavDropdown.Item>
-          </LinkContainer>
-          <LinkContainer to="/places/canada-state">
-            <NavDropdown.Item eventKey={2.2}>Canadian Provinces</NavDropdown.Item>
-          </LinkContainer>
-          <LinkContainer to="/places/country">
-            <NavDropdown.Item eventKey={2.3}>Countries</NavDropdown.Item>
-          </LinkContainer>
-        </NavDropdown>
-      </Nav>
-    </Container>
-  </Navbar> 
-);
+const NavHeader = () => {
+  const history = useHistory();
+  return (
+    <Navbar>
+      <Container>
+        <Navbar.Brand>
+          <Link to="/">Coordinate Commons</Link>
+        </Navbar.Brand>
+        <Navbar.Toggle />
+        <Nav onSelect={handleNavSelect.bind(this, history)}>
+          <Nav.Item>
+            <Nav.Link eventKey='/about'>About</Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link eventKey='/mypage'>My Page</Nav.Link>
+          </Nav.Item>
+          <NavDropdown title="Places" id="places-dropdown">
+            <NavDropdown.Item eventKey='/places/us-state'>
+              US States
+            </NavDropdown.Item>
+            <NavDropdown.Item eventKey='/places/canada-state'>
+              Canadian Provinces
+            </NavDropdown.Item>
+            <NavDropdown.Item eventKey='/places/country'>
+              Countries
+            </NavDropdown.Item>
+          </NavDropdown>
+        </Nav>
+      </Container>
+    </Navbar> 
+  );
+}
+
+const handleNavSelect = (history, eventKey) => {
+  history.push(eventKey);
+}
+
 
 export default NavHeader;

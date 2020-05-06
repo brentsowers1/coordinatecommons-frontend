@@ -14,16 +14,18 @@ class Places extends Component {
       placeType: props.match.params.placeType ? props.match.params.placeType : 'us-state',
       mouseOverPlace: null
     };
-    const callbacks = {
+    this.callbacks = {
       onMouseOver: this.onMapPolygonMouseOver.bind(this),
       onMouseOut: this.onMapPolygonMouseOut.bind(this),
       onClick: this.onMapPolygonClick.bind(this),
       onMapInitialized: this.onMapInitialized.bind(this)
     };
-    this.map = new Map('map', this.getGeoJsonUrl(), callbacks);
   }
 
   componentDidMount() {
+    if (!this.map) {
+      this.map = new Map('map', this.getGeoJsonUrl(), this.callbacks);
+    }
     this.getPlacesAndInitMap();
   }
 
