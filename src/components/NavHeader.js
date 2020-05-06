@@ -11,6 +11,9 @@ const NavHeader = () => (
       </Navbar.Brand>
       <Navbar.Toggle />
       <Nav>
+        <LinkContainer to="/about">
+          <Nav.Item>About</Nav.Item>
+        </LinkContainer>
         <LinkContainer to="/mypage">
           <Nav.Item>My Page</Nav.Item>
         </LinkContainer>

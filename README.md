@@ -1,68 +1,9 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is the front end code for the Coordinate Commons application (https://www.coordinatecommons.com/app)
 
-## Available Scripts
+It's still in the very early stages. Read https://www.coordinatecommons.com/app/about for more infomation on what Coordinate Commons is.
 
-In the project directory, you can run:
+From a technical perspective - this repo is a React application that also use the Google Maps Javascript API. It was started with create-react-app, and uses react-scripts to build and pacakge everything. The produced artifacts are then pushed to an S3 bucket for www.coordinatecommons.com that is mapped to a Cloudfront distribution. I manually run builds from my local machine. I'll be writing lambdas for the back end functionality and utilizing AWS databases (not sure which yet). When I get to the back end, this will be a fully serverless application served through static assets in Cloudfront - a cheap and low maintenance approach!
 
-### `npm start`
+I'm doing this to get more hands on coding experience with React, and more hands on experience with lambdas, node, and AWS technologies. I am a software engineering manager, and have written much code in my years. In the past 5+ years I've managed teams that are building functionality in React, and have managed teams that are doing a few things with lambdas. But I only have a little direct hands on experience coding myself with React, and haven't build any lambdas myself, so I'm doing this project to learn more about those technologies, and to have some fun coding! 
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+To read more about me, visit https://www.coordinatecommons.com.
