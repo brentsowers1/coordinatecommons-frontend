@@ -29,6 +29,9 @@ const NavHeader = () => {
               Countries
             </NavDropdown.Item>
           </NavDropdown>
+          <Nav.Item>
+            <Nav.Link eventKey='/signin'>Sign In</Nav.Link>
+          </Nav.Item>
         </Nav>
       </Container>
     </Navbar> 
