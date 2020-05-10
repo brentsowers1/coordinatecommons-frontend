@@ -1,4 +1,5 @@
 import loadJs from '../util/loadJs';
+import config from '../config';
 
 export default class Map {
   constructor(mapContainerId, geoJsonUrl, callbacks) {
@@ -15,7 +16,6 @@ export default class Map {
     this.callbacks = callbacks;
 
     const baseUrl = 'https://maps.googleapis.com/maps/api/js';
-    const mapKey = 'AIzaSyDRY1U5VsSThTsCbLZm0AeH-j5xCfuAewc'; 
 
     // When initializing the map, we need to know what the instance number is, and what map container to load the map
     // in. So bind the 'this' value when this callback is executed to the 'this' value right now (this instance of
@@ -26,7 +26,7 @@ export default class Map {
       // if the script is loaded synchronously.
       this.initMap();
     } else {
-      loadJs(`${baseUrl}?key=${mapKey}&callback=initMap${window.googleMapInstanceCounter}`);
+      loadJs(`${baseUrl}?key=${config.googleMapsApiKey}&callback=initMap${window.googleMapInstanceCounter}`);
     }
   }
 

@@ -1,23 +1,82 @@
 import React, { Component } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import config from '../config';
+import SignupForm from './SignupForm';
+import VerificationForm from './VerificationForm';
+
+const AmazonCognitoIdentity = require('amazon-cognito-identity-js');
 
 class Signup extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      email: '',
-      alias: '',
-      location: '',
-      password1: '',
-      password2: ''
+      cognitoError: null,
+      cognitoSignupSuccess: false,
+      cognitoVerificationSuccess: false
     };
-
-    this.handleSubmit = this.handleSubmit.bind(this);
+    this.initializeCognito();
   }
 
-  handleSubmit(event) {
-    event.preventDefault();
+  initializeCognito() {
+    const poolData = {
+      UserPoolId: config.cognito.userPoolId,
+      ClientId: config.cognito.userPoolClientId
+    };    
+    this.userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+    if (typeof window.AWSCognito !== 'undefined') {
+      window.AWSCognito.config.region = config.cognito.region;
+    }  
+  }
+
+  handleSignupSubmit(email, alias, location, password) {
+    const attributes = [
+      generateDataAttribute('email', email),
+      generateDataAttribute('custom:alias', alias),
+      generateDataAttribute('custom:Location', location)
+    ];
+
+    this.userPool.signUp(email, password, attributes, null, this.signupCallback.bind(this));
+  }
+
+  signupCallback(err, result) {
+    if (err && err.message) {
+      console.log("Cognito error:");
+      console.log(err);
+      this.setState({
+        cognitoError: err.message,
+        cognitoSignupSuccess: false
+      });
+    } else {
+      this.setState({
+        cognitoError: null,
+        cognitoSignupSuccess: true
+      });
+    }
+  }
+
+  handleVerificationSubmit(email, code) {
+    const cognitoUser = new AmazonCognitoIdentity.CognitoUser({
+      Username: email,
+      Pool: this.userPool
+    });
+    cognitoUser.confirmRegistration(code, true, this.verificationCallback.bind(this));
+  }
+
+  verificationCallback(err, result) {
+    if (err && err.message) {
+      console.log("Cognito error:");
+      console.log(err);
+      this.setState({
+        cognitoError: err.message,
+        cognitoVerificationSuccess: false
+      });      
+    } else {
+      this.setState({
+        cognitoError: null,
+        cognitoVerificationSuccess: true
+      });
+    }    
   }
 
   render() {
@@ -27,58 +86,34 @@ class Signup extends Component {
         <div>
           Already have an account? <Link to='/signin'>Sign In Here!</Link>
         </div>
-        <form onSubmit={this.handleSubmit}>
-          <Row>
-            <Col md={2}>
-              <label for='email'>Email Address:</label>
-            </Col>
-            <Col md={3}>
-              <input name='email' type='text' onChange={(event, newValue) => this.setState({email: newValue})} required />
-            </Col>
-          </Row>
-          <Row>
-            <Col md={2}>
-              <label for='alias'>Alias:</label><br />
-              (what's shown publicly)
-            </Col>
-            <Col md={3}>
-              <input name='alias' type='text' onChange={(event, newValue) => this.setState({alias: newValue})} required />
-            </Col>
-          </Row>
-          <Row>
-            <Col md={2}>
-              <label for='location'>Location:</label><br />
-              (optional)
-            </Col>
-            <Col md={3}>
-              <input name='location' type='text' onChange={(event, newValue) => this.setState({location: newValue})} />
-            </Col>
-          </Row>
-          <Row>
-            <Col md={2}>
-              <label for='password1'>Password:</label>
-            </Col>
-            <Col md={3}>
-              <input name='password1' type='password' onChange={(event, newValue) => this.setState({password1: newValue})} required />
-            </Col>
-          </Row>
-          <Row>
-            <Col md={2}>
-              <label for='password2'>Confirm Password:</label>
-            </Col>
-            <Col md={3}>
-              <input name='password2' type='password' onChange={(event, newValue) => this.setState({password2: newValue})} required />
-            </Col>
-          </Row>
-          <Row>
-            <Col md={3}>
-              <input type='submit' value='Create Account' />
-            </Col>
-          </Row>
-        </form>
+        {this.state.cognitoVerificationSuccess ?
+          <div>Successfully signed up and verified! Please <Link to='/signin'>Sign In</Link> with your email address and password.</div>
+          : 
+          this.state.cognitoSignupSuccess ?
+            <VerificationForm onSubmit={this.handleVerificationSubmit.bind(this)} />
+            :
+            <SignupForm onSubmit={this.handleSignupSubmit.bind(this)} />
+        }
+        <Row>
+          <Col md={5}>
+            {this.state.cognitoError ? 
+              <div>
+                <div>Error attempting to create account:</div>
+                <div>{this.state.cognitoError}</div>
+              </div> : ''
+            }
+          </Col>
+        </Row>        
       </Container>
     );
   }
+};
+
+const generateDataAttribute = (attributeName, attributeValue) => {
+  return new AmazonCognitoIdentity.CognitoUserAttribute({
+    Name: attributeName,
+    Value: attributeValue
+  });
 };
 
 export default Signup;

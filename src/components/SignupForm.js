@@ -1,0 +1,81 @@
+import React, { useState } from 'react';
+import { Row, Col } from 'react-bootstrap';
+
+const SignupForm = (props) => {
+  const [email, setEmail] = useState('');
+  const [alias, setAlias] = useState('');
+  const [location, setLocation] = useState('');
+  const [password1, setPassword1] = useState(''); 
+  const [password2, setPassword2] = useState('');
+  const [passwordsDontMatch, setPasswordsDontMatch] = useState(false);
+
+  return (
+    <form onSubmit={(event) => {
+      event.preventDefault();
+      localFormSubmit(email, alias, location, password1, password2, setPasswordsDontMatch, props.onSubmit);
+    }}>  
+      <Row>
+        <Col md={2}>
+          <label htmlFor='email'>Email Address:</label>
+        </Col>
+        <Col md={3}>
+          <input name='email' type='text' onChange={(e) => setEmail(e.target.value)} required />
+        </Col>
+      </Row>
+      <Row>
+        <Col md={2}>
+          <label htmlFor='alias'>Alias:</label><br />
+          (what's shown publicly)
+        </Col>
+        <Col md={3}>
+          <input name='alias' type='text' onChange={(e) => setAlias(e.target.value)} required />
+        </Col>
+      </Row>
+      <Row>
+        <Col md={2}>
+          <label htmlFor='location'>Location:</label><br />
+          (optional)
+        </Col>
+        <Col md={3}>
+          <input name='location' type='text' onChange={(e) => setLocation(e.target.value)} />
+        </Col>
+      </Row>
+      <Row>
+        <Col md={2}>
+          <label htmlFor='password1'>Password:</label>
+        </Col>
+        <Col md={3}>
+          <input name='password1' type='password' onChange={(e) => setPassword1(e.target.value)} required />
+        </Col>
+      </Row>
+      <Row>
+        <Col md={2}>
+          <label htmlFor='password2'>Confirm Password:</label>
+        </Col>
+        <Col md={3}>
+          <input name='password2' type='password' onChange={(e) => setPassword2(e.target.value)} required />
+          {passwordsDontMatch ? 
+            <div>Passwords do not match, please correct and submit again</div>
+            : ''}
+        </Col>
+      </Row>
+      <Row>
+        <Col md={3}>
+          <input type='submit' value='Create Account' />
+        </Col>
+      </Row>
+    </form>
+  );
+};
+
+const localFormSubmit = (email, alias, location, password1, password2, setPasswordsDontMatch, onSubmit) => {
+  if (password1 !== password2) {
+    setPasswordsDontMatch(true);
+    return;
+  } else {
+    setPasswordsDontMatch(false);
+    onSubmit(email, alias, location, password1);
+  }
+}
+
+export default SignupForm;
