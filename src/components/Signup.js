@@ -1,11 +1,9 @@
 import React, { Component } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import config from '../config';
 import SignupForm from './SignupForm';
 import VerificationForm from './VerificationForm';
-
-const AmazonCognitoIdentity = require('amazon-cognito-identity-js');
+import CognitoAuth from '../classes/CognitoAuth';
 
 class Signup extends Component {
   constructor(props) {
@@ -17,28 +15,11 @@ class Signup extends Component {
       cognitoVerificationSuccess: false,
       username: ''
     };
-    this.initializeCognito();
-  }
-
-  initializeCognito() {
-    const poolData = {
-      UserPoolId: config.cognito.userPoolId,
-      ClientId: config.cognito.userPoolClientId
-    };    
-    this.userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
-    if (typeof window.AWSCognito !== 'undefined') {
-      window.AWSCognito.config.region = config.cognito.region;
-    }  
   }
 
   handleSignupSubmit(username, email, location, password) {
     this.setState({username: username});
-    const attributes = [
-      generateDataAttribute('email', email),
-      generateDataAttribute('custom:location', location)
-    ];
-
-    this.userPool.signUp(username, password, attributes, null, this.signupCallback.bind(this));
+    CognitoAuth.signup(username, email, location, password, this.signupCallback.bind(this));
   }
 
   signupCallback(err, result) {
@@ -60,14 +41,7 @@ class Signup extends Component {
   }
 
   handleVerificationSubmit(username, code) {
-    if (!this.userPool) {
-      this.initializeCognito();
-    }
-    const cognitoUser = new AmazonCognitoIdentity.CognitoUser({
-      Username: username,
-      Pool: this.userPool
-    });
-    cognitoUser.confirmRegistration(code, true, this.verificationCallback.bind(this));
+    CognitoAuth.verify(username, code, this.verificationCallback.bind(this));
   }
 
   verificationCallback(err, result) {
@@ -123,13 +97,6 @@ class Signup extends Component {
       </Container>
     );
   }
-};
-
-const generateDataAttribute = (attributeName, attributeValue) => {
-  return new AmazonCognitoIdentity.CognitoUserAttribute({
-    Name: attributeName,
-    Value: attributeValue
-  });
 };
 
 export default Signup;

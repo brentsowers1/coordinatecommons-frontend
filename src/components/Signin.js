@@ -1,15 +1,16 @@
 import React, { Component } from 'react';
 import { Container } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import CognitoAuth from '../classes/CognitoAuth';
 
 class Signin extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      email: '',
-      password: ''
+      username: '',
+      password: '',
+      cognitoError: null
     };
-
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
@@ -24,14 +25,14 @@ class Signin extends Component {
         <form onSubmit={this.handleSubmit}>
           <div>
             <label>
-              Email address:
-              <input type='text'onChange={(event, newValue) => this.setState({email: newValue})} required />
+              Username:
+              <input type='text'onChange={(e) => this.setState({username: e.target.value})} required />
             </label>
           </div>
           <div>
             <label>
               Password:
-              <input type='password' onChange={(event, newValue) => this.setState({password: newValue})} required />
+              <input type='password' onChange={(e) => this.setState({password: e.target.value})} required />
             </label>
           </div>
         </form>

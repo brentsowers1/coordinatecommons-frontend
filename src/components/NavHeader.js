@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Container, Nav, NavDropdown, Navbar } from 'react-bootstrap';
 import { Link, useHistory } from "react-router-dom";
 
 const NavHeader = () => {
   const history = useHistory();
+  //const [isLoggedin, setIsLoggedIn] = getState(false);
+
   return (
     <Navbar>
       <Container>
