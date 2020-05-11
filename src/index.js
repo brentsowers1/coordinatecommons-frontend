@@ -18,7 +18,8 @@ render(
     <Route path='/mypage' component={MyPage} />
     <Route path='/about' component={About} />
     <Route path='/signin' component={Signin} />
-    <Route path='/signup' component={Signup} /> 
+    <Route path='/signup' component={Signup} />
+    <Route path='/verify' render={() => <Signup verify={true} />} />
   </Router>,
   document.getElementById('root')
 );

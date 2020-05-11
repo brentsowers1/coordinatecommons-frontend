@@ -3,7 +3,7 @@ import { Row, Col } from 'react-bootstrap';
 
 const SignupForm = (props) => {
   const [email, setEmail] = useState('');
-  const [alias, setAlias] = useState('');
+  const [username, setUsername] = useState('');
   const [location, setLocation] = useState('');
   const [password1, setPassword1] = useState(''); 
   const [password2, setPassword2] = useState('');
@@ -12,23 +12,23 @@ const SignupForm = (props) => {
   return (
     <form onSubmit={(event) => {
       event.preventDefault();
-      localFormSubmit(email, alias, location, password1, password2, setPasswordsDontMatch, props.onSubmit);
+      localFormSubmit(username, email, location, password1, password2, setPasswordsDontMatch, props.onSubmit);
     }}>  
+      <Row>
+        <Col md={2}>
+          <label htmlFor='alias'>Username:</label><br />
+          (what's shown publicly)
+        </Col>
+        <Col md={3}>
+          <input name='alias' type='text' onChange={(e) => setUsername(e.target.value)} required />
+        </Col>
+      </Row>
       <Row>
         <Col md={2}>
           <label htmlFor='email'>Email Address:</label>
         </Col>
         <Col md={3}>
           <input name='email' type='text' onChange={(e) => setEmail(e.target.value)} required />
-        </Col>
-      </Row>
-      <Row>
-        <Col md={2}>
-          <label htmlFor='alias'>Alias:</label><br />
-          (what's shown publicly)
-        </Col>
-        <Col md={3}>
-          <input name='alias' type='text' onChange={(e) => setAlias(e.target.value)} required />
         </Col>
       </Row>
       <Row>
@@ -68,13 +68,13 @@ const SignupForm = (props) => {
   );
 };
 
-const localFormSubmit = (email, alias, location, password1, password2, setPasswordsDontMatch, onSubmit) => {
+const localFormSubmit = (username, email, location, password1, password2, setPasswordsDontMatch, onSubmit) => {
   if (password1 !== password2) {
     setPasswordsDontMatch(true);
     return;
   } else {
     setPasswordsDontMatch(false);
-    onSubmit(email, alias, location, password1);
+    onSubmit(username, email, location, password1);
   }
 }
 

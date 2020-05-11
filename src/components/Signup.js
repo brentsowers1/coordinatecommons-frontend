@@ -12,8 +12,10 @@ class Signup extends Component {
     super(props);
     this.state = {
       cognitoError: null,
+      loadVerificationPage: props.verify === true,
       cognitoSignupSuccess: false,
-      cognitoVerificationSuccess: false
+      cognitoVerificationSuccess: false,
+      username: ''
     };
     this.initializeCognito();
   }
@@ -29,14 +31,14 @@ class Signup extends Component {
     }  
   }
 
-  handleSignupSubmit(email, alias, location, password) {
+  handleSignupSubmit(username, email, location, password) {
+    this.setState({username: username});
     const attributes = [
       generateDataAttribute('email', email),
-      generateDataAttribute('custom:alias', alias),
-      generateDataAttribute('custom:Location', location)
+      generateDataAttribute('custom:location', location)
     ];
 
-    this.userPool.signUp(email, password, attributes, null, this.signupCallback.bind(this));
+    this.userPool.signUp(username, password, attributes, null, this.signupCallback.bind(this));
   }
 
   signupCallback(err, result) {
@@ -45,19 +47,24 @@ class Signup extends Component {
       console.log(err);
       this.setState({
         cognitoError: err.message,
-        cognitoSignupSuccess: false
+        cognitoSignupSuccess: false,
+        loadVerificationPage: false
       });
     } else {
       this.setState({
         cognitoError: null,
-        cognitoSignupSuccess: true
+        cognitoSignupSuccess: true,
+        loadVerificationPage: true
       });
     }
   }
 
-  handleVerificationSubmit(email, code) {
+  handleVerificationSubmit(username, code) {
+    if (!this.userPool) {
+      this.initializeCognito();
+    }
     const cognitoUser = new AmazonCognitoIdentity.CognitoUser({
-      Username: email,
+      Username: username,
       Pool: this.userPool
     });
     cognitoUser.confirmRegistration(code, true, this.verificationCallback.bind(this));
@@ -86,13 +93,22 @@ class Signup extends Component {
         <div>
           Already have an account? <Link to='/signin'>Sign In Here!</Link>
         </div>
+        {this.state.loadVerificationPage ? '' : 
+          <div>
+            Already signed up and have a verification code? <Link to='/verify'>Enter It Here!</Link>
+          </div>
+        }
         {this.state.cognitoVerificationSuccess ?
           <div>Successfully signed up and verified! Please <Link to='/signin'>Sign In</Link> with your email address and password.</div>
           : 
-          this.state.cognitoSignupSuccess ?
-            <VerificationForm onSubmit={this.handleVerificationSubmit.bind(this)} />
+          this.state.loadVerificationPage ?
+            <VerificationForm 
+              onSubmit={this.handleVerificationSubmit.bind(this)}
+              username={this.state.username}
+              transitionFromSignup={this.state.cognitoSignupSuccess} />
             :
-            <SignupForm onSubmit={this.handleSignupSubmit.bind(this)} />
+            <SignupForm 
+              onSubmit={this.handleSignupSubmit.bind(this)} />
         }
         <Row>
           <Col md={5}>

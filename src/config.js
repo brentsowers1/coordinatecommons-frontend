@@ -1,8 +1,8 @@
 const config = {
   googleMapsApiKey: 'AIzaSyDRY1U5VsSThTsCbLZm0AeH-j5xCfuAewc',
   cognito: {
-    userPoolId: 'us-east-1_4RtbcldwT',
-    userPoolClientId: '596jedju9tguno8epor21ir57u',
+    userPoolId: 'us-east-1_67Tq0YnGG',
+    userPoolClientId: '7ibqfgt5tq9u3o82ivc9kablpj',
     region: 'us-east-1'
   }
 };
