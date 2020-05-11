@@ -1,9 +1,9 @@
 let LoggedInUser = {
+  isLoggedIn: false,
   username: null,
   email: null,
   location: null,
-  idToken: null,
-  jwtToken: null
+  token: null
 };
 
 export default LoggedInUser;

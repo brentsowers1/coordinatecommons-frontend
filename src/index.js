@@ -8,6 +8,7 @@ import Places from './components/Places';
 import About from './components/About';
 import Signin from './components/Signin';
 import Signup from './components/Signup';
+import Logout from './components/Logout';
 
 render(
   <Router basename='/app'>
@@ -18,6 +19,7 @@ render(
     <Route path='/mypage' component={MyPage} />
     <Route path='/about' component={About} />
     <Route path='/signin' component={Signin} />
+    <Route path='/logout' component={Logout} />
     <Route path='/signup' component={Signup} />
     <Route path='/verify' render={() => <Signup verify={true} />} />
   </Router>,

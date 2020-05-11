@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { Container, Nav, NavDropdown, Navbar } from 'react-bootstrap';
 import { Link, useHistory } from "react-router-dom";
+import LoggedInUser from '../classes/LoggedInUser';
+import CognitoAuth from '../classes/CognitoAuth';
 
 const NavHeader = () => {
   const history = useHistory();
-  //const [isLoggedin, setIsLoggedIn] = getState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(LoggedInUser.isLoggedIn);
+  CognitoAuth.registerLoggedInUserChangeCallback(loggedInCallback.bind(this, setIsLoggedIn));
 
   return (
     <Navbar>
@@ -32,13 +35,21 @@ const NavHeader = () => {
             </NavDropdown.Item>
           </NavDropdown>
           <Nav.Item>
-            <Nav.Link eventKey='/signin'>Sign In</Nav.Link>
+            {isLoggedIn ?
+              <Nav.Link eventKey = '/logout'>Log Out</Nav.Link>
+              :
+              <Nav.Link eventKey='/signin'>Sign In</Nav.Link>              
+            }
           </Nav.Item>
         </Nav>
       </Container>
     </Navbar> 
   );
 }
+
+const loggedInCallback = (setIsLoggedIn) => {
+  setIsLoggedIn(LoggedInUser.isLoggedIn);
+};
 
 const handleNavSelect = (history, eventKey) => {
   history.push(eventKey);

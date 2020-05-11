@@ -43,12 +43,30 @@ class CognitoAuth {
     });
   }
 
+  logout() {
+    if (LoggedInUser.isLoggedIn) {
+      const cognitoUser = getCognitoUser(this.userPool, LoggedInUser.username);
+      cognitoUser.signOut();
+      LoggedInUser.isLoggedIn = false;
+      this.registerLoggedInUserChangeCallbacks.map(c => c());      
+    }
+  }
+
   registerLoggedInUserChangeCallback(loggedInUserChangeCallback) {
     this.registerLoggedInUserChangeCallbacks.push(loggedInUserChangeCallback);
   }
 
   localAuthenticationSuccessCallback(successCallback, errorCallback, result) {
     const accessToken = result.getAccessToken().getJwtToken();
+    const payload = result.getIdToken().decodePayload();
+    LoggedInUser.isLoggedIn = true;
+    LoggedInUser.token = accessToken;
+    LoggedInUser.username = payload['cognito:username'];
+    LoggedInUser.email = payload['email'];
+    LoggedInUser.location = payload['custom:location'];
+    this.registerLoggedInUserChangeCallbacks.map(c => c());
+
+    successCallback();
     /*window.AWS.config.region = config.cognito.region;
     const loginsObject = {};
     loginsObject[`cognito-idp.${config.cognito.region}.amazonaws.com/${config.cognito.userPoolId}`] = result.getIdToken().getJwtToken();
