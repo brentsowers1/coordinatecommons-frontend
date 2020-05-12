@@ -1,6 +1,5 @@
 import LoggedInUser from './LoggedInUser';
 import config from '../config';
-//import * as AWS from 'aws-sdk/global';
 const AmazonCognitoIdentity = require('amazon-cognito-identity-js');
 
 class CognitoAuth {
@@ -57,30 +56,17 @@ class CognitoAuth {
   }
 
   localAuthenticationSuccessCallback(successCallback, errorCallback, result) {
-    const accessToken = result.getAccessToken().getJwtToken();
+    const accessToken = result.getIdToken().getJwtToken();
     const payload = result.getIdToken().decodePayload();
     LoggedInUser.isLoggedIn = true;
     LoggedInUser.token = accessToken;
     LoggedInUser.username = payload['cognito:username'];
     LoggedInUser.email = payload['email'];
     LoggedInUser.location = payload['custom:location'];
+    console.log(`Successfully logged in user ${LoggedInUser.username}`);
     this.registerLoggedInUserChangeCallbacks.map(c => c());
 
     successCallback();
-    /*window.AWS.config.region = config.cognito.region;
-    const loginsObject = {};
-    loginsObject[`cognito-idp.${config.cognito.region}.amazonaws.com/${config.cognito.userPoolId}`] = result.getIdToken().getJwtToken();
-    window.AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-      IdentityPoolId: config.cognito.userPoolId,
-      Logins: loginsObject
-    });
-    window.AWS.config.credentials.refresh((error) => {
-      if (error) {
-        errorCallback(error);
-      } else {
-        successCallback();
-      }
-    });*/
   }
   
 };

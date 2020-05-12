@@ -14,20 +14,21 @@ const About = () => (
 
     <p>Coordinate Commons is a side project of <a href="https://www.coordinatecommons.com/">Brent Sowers</a>. I'm doing this partially because I really do want to build this product as I will find it useful for me, and I'm sure it will help others as well. I'm also doing it to get some good web development experience with React, node, lambdas, and AWS. I am a senior software engineering manager, and have done much web application development in my career, but do not have a lot of direct hands on coding experience with React and node, so I want to expand my skillset. What better way to do this than to build my own side project!</p>
 
-    <p>Here's a rough roadmap of features and functionality and I am planning to implement (on no specific timeline!)
-      <ul>
-        <li>Accounts and logins</li>
-        <li>Saving places you click to visit</li>
-        <li>More/less precise places on the map when you zoom in/out</li>
-        <li>Counties</li>
-        <li>A "My Page" that lists all of your places across place types</li>
-        <li>Properly styled user interface</li>
-        <li>A shareable page of your places that doesn't require you to log in</li>
-        <li>Leaderboards</li>
-        <li>Defining your own categories to classify visits</li>
-        <li>Other place types like highways, cities, and mountains</li>
-      </ul>
-    </p>
+    <p>Here's a rough roadmap of features and functionality and I am planning to implement (on no specific timeline!)</p>
+    <ul>
+      <li>Persisting the login - ability to remember device</li>
+      <li>Forgot username and/or password functionality</li>
+      <li>Making the permanent URLs for subpages work (like /app/verify)</li>
+      <li>Saving places you click to visit</li>
+      <li>More/less precise places on the map when you zoom in/out</li>
+      <li>Counties</li>
+      <li>A "My Page" that lists all of your places across place types</li>
+      <li>Properly styled user interface</li>
+      <li>A shareable page of your places that doesn't require you to log in</li>
+      <li>Leaderboards</li>
+      <li>Defining your own categories to classify visits</li>
+      <li>Other place types like highways, cities, and mountains</li>
+    </ul>
   </Container>
 );
 

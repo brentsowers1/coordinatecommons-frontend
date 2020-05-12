@@ -1,10 +1,14 @@
 import React, { Component } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 import PlaceList from './PlaceList';
 import './Places.css';
 import axios from 'axios';
 import Map from '../classes/Map';
 import { getFullProperPlaceType } from '../util/place-type-name-utils';
+import ApiClient from '../classes/ApiClient';
+import LoggedInUser from '../classes/LoggedInUser';
+import CognitoAuth from '../classes/CognitoAuth';
 
 class Places extends Component {
   constructor(props) {
@@ -12,7 +16,9 @@ class Places extends Component {
     this.state = {
       places: [],
       placeType: props.match.params.placeType ? props.match.params.placeType : 'us-state',
-      mouseOverPlace: null
+      mouseOverPlace: null,
+      lambdaResponse: null,
+      isLoggedIn: LoggedInUser.isLoggedIn
     };
     this.callbacks = {
       onMouseOver: this.onMapPolygonMouseOver.bind(this),
@@ -20,6 +26,8 @@ class Places extends Component {
       onClick: this.onMapPolygonClick.bind(this),
       onMapInitialized: this.onMapInitialized.bind(this)
     };
+  
+    CognitoAuth.registerLoggedInUserChangeCallback(this.loggedInCallback.bind(this));    
   }
 
   componentDidMount() {
@@ -41,6 +49,10 @@ class Places extends Component {
       this.getPlacesAndInitMap();
     }
   }
+
+  loggedInCallback() {
+    this.setState({isLoggedIn: LoggedInUser.isLoggedIn});
+  };  
 
   getDataBaseUrl() {
     return `${process.env.PUBLIC_URL}/data/${this.state.placeType}`;
@@ -74,11 +86,24 @@ class Places extends Component {
   }
 
   onMapPolygonClick(id) {
+    this.map.toggleFeatureSelected(id);
     const newPlaces = [...this.state.places];
     const foundPlace = newPlaces.find(p => p.id === id);
-    if (foundPlace) foundPlace.visited = !foundPlace.visited;
-    this.setState({places: newPlaces});
-    this.map.toggleFeatureSelected(id);
+    if (foundPlace) {
+      foundPlace.visited = !foundPlace.visited;
+      this.setState({places: newPlaces});
+      if (LoggedInUser.isLoggedIn) {
+        ApiClient.savePlace(id, 
+          (response) => {
+            const message = `Successfully called lambda to save place ID ${response.placeId} for user ${response.username}! Note that this doesn't actually save to a database yet, but shows that it did successfully call the lambda.`;
+            this.setState({lambdaResponse: message});
+          },
+          (err) => {
+            const message = `Error calling the lambda. Check the console for details`;
+            this.setState({lambdaResponse: message});
+          });
+      }
+    }
   }
 
   onMapInitialized() {
@@ -107,6 +132,28 @@ class Places extends Component {
             </div>
           </Col>
         </Row>
+        {this.state.lambdaResponse ? 
+          <Row>
+            <Col md={12}>
+              {this.state.lambdaResponse}
+            </Col>
+          </Row>
+          : 
+          ''
+        }
+        {this.state.isLoggedIn ?
+          <Row>
+            <Col md={12}>
+              Click on a place to mark that you've visited that place.
+            </Col>
+          </Row>          
+          :
+          <Row>
+            <Col md={12}>
+              <Link to='/signin'>Sign In</Link> to permanently save places that you click on. If you do not have an account, <Link to='/signup'>Sign Up</Link>!
+            </Col>
+          </Row>
+        }        
         <Row>
           <Col sm={12} md={12} lg={12} xl={12} className="no-float">
             <PlaceList
