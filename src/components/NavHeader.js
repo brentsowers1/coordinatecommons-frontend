@@ -7,7 +7,16 @@ import CognitoAuth from '../classes/CognitoAuth';
 const NavHeader = () => {
   const history = useHistory();
   const [isLoggedIn, setIsLoggedIn] = useState(LoggedInUser.isLoggedIn);
-  CognitoAuth.registerLoggedInUserChangeCallback(loggedInCallback.bind(this, setIsLoggedIn));
+
+  const loggedInCallback = () => {
+    setIsLoggedIn(LoggedInUser.isLoggedIn);
+  };
+  
+  const handleNavSelect = (eventKey) => {
+    history.push(eventKey);
+  }
+
+  CognitoAuth.registerLoggedInUserChangeCallback(loggedInCallback);
 
   return (
     <Navbar>
@@ -16,7 +25,7 @@ const NavHeader = () => {
           <Link to="/">Coordinate Commons</Link>
         </Navbar.Brand>
         <Navbar.Toggle />
-        <Nav onSelect={handleNavSelect.bind(this, history)}>
+        <Nav onSelect={handleNavSelect}>
           <Nav.Item>
             <Nav.Link eventKey='/about'>About</Nav.Link>
           </Nav.Item>
@@ -34,26 +43,19 @@ const NavHeader = () => {
               Countries
             </NavDropdown.Item>
           </NavDropdown>
-          <Nav.Item>
-            {isLoggedIn ?
-              <Nav.Link eventKey = '/logout'>Log Out</Nav.Link>
-              :
-              <Nav.Link eventKey='/signin'>Sign In</Nav.Link>              
-            }
-          </Nav.Item>
+          {isLoggedIn ?
+            <Nav.Item>
+              Welcome {LoggedInUser.username}! (<Link to='/logout'>Log Out</Link>)
+            </Nav.Item>          
+            :
+            <Nav.Item>
+              <Nav.Link eventKey='/signin'>Sign In</Nav.Link>
+            </Nav.Item>
+          }
         </Nav>
       </Container>
     </Navbar> 
   );
 }
-
-const loggedInCallback = (setIsLoggedIn) => {
-  setIsLoggedIn(LoggedInUser.isLoggedIn);
-};
-
-const handleNavSelect = (history, eventKey) => {
-  history.push(eventKey);
-}
-
 
 export default NavHeader;
