@@ -52,6 +52,7 @@ class Places extends Component {
 
   loggedInCallback() {
     this.setState({isLoggedIn: LoggedInUser.isLoggedIn});
+    this.getVisitedPlaces();
   };  
 
   getDataBaseUrl() {
@@ -66,11 +67,34 @@ class Places extends Component {
   getPlacesAndInitMap() {
     axios.get(`${this.getDataBaseUrl()}-data.json`).then(rsp => {
         this.setState({places: rsp.data});
+        this.getVisitedPlaces();
       })
       .catch(err => {
         console.log(`Error getting place data ${this.state.placeType}`, err);
       });
     this.map.initMap(this.getGeoJsonUrl());
+  }
+
+  getVisitedPlaces() {
+    if (LoggedInUser.isLoggedIn) {
+      ApiClient.getVisitedPlaces(this.state.placeType, 
+        (response) => {
+          const visitedPlacesHash = response.placesVisited.reduce((hash, curPlace) => {
+            hash[curPlace.Id] = true;
+            this.map.toggleFeatureSelected(curPlace.Id);
+            return hash;
+          }, {});
+          const newPlaces = [...this.state.places];
+          newPlaces.forEach(place => {
+            place.visited = visitedPlacesHash[place.id] === true; 
+          });
+          this.setState({places: newPlaces});
+        },
+        (err) => {
+
+        }  
+      )
+    }
   }
 
   onPlaceClick(place) {
@@ -93,9 +117,9 @@ class Places extends Component {
       foundPlace.visited = !foundPlace.visited;
       this.setState({places: newPlaces});
       if (LoggedInUser.isLoggedIn) {
-        ApiClient.savePlace(id, foundPlace.visited, this.state.placeType, 
+        ApiClient.saveVisit(id, foundPlace.visited, this.state.placeType, 
           (response) => {
-            const message = `Successfully called lambda to ${response.visited ? 'save' : 'remove'} place ID ${response.placeId} for user ${response.username}!`;
+            const message = `Successfully called lambda to ${response.visited ? 'save' : 'remove'} visit for place ID ${response.placeId} for user ${response.username}!`;
             this.setState({lambdaResponse: message});
           },
           (err) => {
