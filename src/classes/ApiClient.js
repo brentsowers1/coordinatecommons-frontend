@@ -4,11 +4,11 @@ import config from '../config';
 
 class ApiClient {
 
-  savePlace(placeId, successCallback, errorCallback) {
+  savePlace(placeId, visited, placeType, successCallback, errorCallback) {
     axios({
       method: 'post',
       url: getUrl('/place'),
-      data: { placeId: placeId },
+      data: { placeId, placeType, visited },
       headers: headers()
     }).then((response) => {
       console.log('Success calling savePlace');

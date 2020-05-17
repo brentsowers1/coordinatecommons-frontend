@@ -93,9 +93,9 @@ class Places extends Component {
       foundPlace.visited = !foundPlace.visited;
       this.setState({places: newPlaces});
       if (LoggedInUser.isLoggedIn) {
-        ApiClient.savePlace(id, 
+        ApiClient.savePlace(id, foundPlace.visited, this.state.placeType, 
           (response) => {
-            const message = `Successfully called lambda to save place ID ${response.placeId} for user ${response.username}! Note that this doesn't actually save to a database yet, but shows that it did successfully call the lambda.`;
+            const message = `Successfully called lambda to ${response.visited ? 'save' : 'remove'} place ID ${response.placeId} for user ${response.username}!`;
             this.setState({lambdaResponse: message});
           },
           (err) => {
