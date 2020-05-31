@@ -10,6 +10,13 @@ import ApiClient from '../classes/ApiClient';
 import LoggedInUser from '../classes/LoggedInUser';
 import CognitoAuth from '../classes/CognitoAuth';
 
+// I tried making this class a functional component. But because of the callbacks that are needed for maps (when
+// polygons are clicked), and auth (when logged in), the only way I could get things to work was a lot of hacks, 
+// using refs, and getting around the concept of local state. The end result was bad and flaky. The class based
+// component is fine and works great. Other than the binding to this being confusing, I think a class based 
+// component for something complex like this component is best, better than a functional component with 
+// providers, reducers, etc
+
 class Places extends Component {
   constructor(props) {
     super(props);
@@ -23,8 +30,7 @@ class Places extends Component {
     this.callbacks = {
       onMouseOver: this.onMapPolygonMouseOver.bind(this),
       onMouseOut: this.onMapPolygonMouseOut.bind(this),
-      onClick: this.onMapPolygonClick.bind(this),
-      onMapInitialized: this.onMapInitialized.bind(this)
+      onClick: this.onMapPolygonClick.bind(this)
     };
   
     CognitoAuth.registerLoggedInUserChangeCallback(this.loggedInCallback.bind(this));    
@@ -59,7 +65,6 @@ class Places extends Component {
     return `${process.env.PUBLIC_URL}/data/${this.state.placeType}`;
   }
 
-
   getGeoJsonUrl() {
     return `${this.getDataBaseUrl()}-medium-geojson.json`;
   }
@@ -91,14 +96,10 @@ class Places extends Component {
           this.setState({places: newPlaces});
         },
         (err) => {
-
+          console.error('Couldn\'t get visited places');
         }  
       )
     }
-  }
-
-  onPlaceClick(place) {
-    this.map.setCenter(place);
   }
 
   onMapPolygonMouseOver(id) {
@@ -128,10 +129,6 @@ class Places extends Component {
           });
       }
     }
-  }
-
-  onMapInitialized() {
-
   }
 
   getPlaceFromId(id) {
