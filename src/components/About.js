@@ -19,7 +19,6 @@ const About = () => (
       <li>Persisting the login - ability to remember device</li>
       <li>Forgot username and/or password functionality</li>
       <li>Making the permanent URLs for subpages work (like /app/verify)</li>
-      <li>Saving places you click to visit</li>
       <li>More/less precise places on the map when you zoom in/out</li>
       <li>Counties</li>
       <li>A "My Page" that lists all of your places across place types</li>
