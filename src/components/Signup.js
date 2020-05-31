@@ -5,6 +5,10 @@ import SignupForm from './SignupForm';
 import VerificationForm from './VerificationForm';
 import CognitoAuth from '../classes/CognitoAuth';
 
+// Can't make this a functional component because of the callbacks from auth. I could possibly pass
+// variables in to the callbacks, and rely on the state not changing between now and when the auth
+// callbacks pass, but I feel this is more straightforward and makes more sense.
+
 class Signup extends Component {
   constructor(props) {
     super(props);
