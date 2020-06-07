@@ -2,7 +2,7 @@ import loadJs from '../util/loadJs';
 import config from '../config';
 
 export default class Map {
-  constructor(mapContainerId, geoJsonUrl, callbacks) {
+  constructor(mapContainerId, geoJsonUrlBase, placeType, callbacks) {
     // This is necessary so that we can have any number of map instances
     if (window.googleMapInstanceCounter) {
       window.googleMapInstanceCounter++;
@@ -11,9 +11,11 @@ export default class Map {
     }
 
     this.googleMap = null;
-    this.geoJsonUrl = geoJsonUrl;
+    this.geoJsonUrlBase = geoJsonUrlBase;
+    this.placeType = placeType;
     this.mapContainerId = mapContainerId;
     this.callbacks = callbacks;
+    this.zoom = 5;
 
     const baseUrl = 'https://maps.googleapis.com/maps/api/js';
 
@@ -35,9 +37,9 @@ export default class Map {
     window[`initMap${this.instanceNumber}`] = null;    
   }
 
-  initMap(geoJsonUrl) {
-    if (geoJsonUrl) {
-      this.geoJsonUrl = geoJsonUrl;
+  initMap(placeType) {
+    if (placeType) {
+      this.placeType = placeType;
     }
     // initMap will get called twice - once on the google maps callback after the script is loaded, and when the React
     // component that includes this class is mounted. places will only be set on the React component's mount, but, when that
@@ -47,11 +49,23 @@ export default class Map {
         center: { lat: 39.8283, lng: -98.5795 },
         zoom: 5
       });
-      this.googleMap.data.loadGeoJson(this.geoJsonUrl, null, (features) => {
-        if (this.callbacks.onMapInitialized) {
-          this.callbacks.onMapInitialized();
+      this.zoom = 5;
+      this.googleMap.addListener('zoom_changed', () => {
+        const oldGeoJsonUrl = this.geoJsonUrl();
+        this.zoom = this.googleMap.getZoom();
+        const newGeoJsonUrl = this.geoJsonUrl();
+        if (oldGeoJsonUrl !== newGeoJsonUrl) {
+          this.googleMap.data.forEach((feature) => {
+            this.googleMap.data.remove(feature);  
+          });
+          this.googleMap.data.loadGeoJson(newGeoJsonUrl, null, (features) => {
+            if (this.callbacks && this.callbacks.onDataReloaded) {
+              this.callbacks.onDataReloaded();
+            }
+          });
         }
       });
+      this.googleMap.data.loadGeoJson(this.geoJsonUrl());
       this.googleMap.data.setStyle(setFeatureStyle);
       this.googleMap.data.addListener('click', (event) => {
         if (this.callbacks && this.callbacks.onClick) {
@@ -87,7 +101,23 @@ export default class Map {
       this.googleMap.setCenter(getLatLng(place.center));
     }
   }
-  
+
+  geoJsonUrl() {
+    return `${this.geoJsonUrlBase}/${this.placeType}-${getPrecision(this.placeType, this.zoom)}-geojson.json`;  
+  }
+}
+
+const getPrecision = (placeType, zoomLevel) => {
+  switch (placeType) {
+    case 'country':
+      return zoomLevel < 7 ? 'medium' : 'large';
+    case 'us-state':
+      return zoomLevel < 8 ? 'medium' : 'large';
+    case 'canada-state':
+      return zoomLevel < 8 ? 'medium' : 'large';
+    default:
+      return 'medium';
+  }
 }
 
 const setFeatureStyle = (feature) => {

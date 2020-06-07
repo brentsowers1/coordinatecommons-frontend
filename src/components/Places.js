@@ -30,7 +30,8 @@ class Places extends Component {
     this.callbacks = {
       onMouseOver: this.onMapPolygonMouseOver.bind(this),
       onMouseOut: this.onMapPolygonMouseOut.bind(this),
-      onClick: this.onMapPolygonClick.bind(this)
+      onClick: this.onMapPolygonClick.bind(this),
+      onDataReloaded: this.onMapDataReloaded.bind(this)
     };
   
     CognitoAuth.registerLoggedInUserChangeCallback(this.loggedInCallback.bind(this));    
@@ -38,7 +39,7 @@ class Places extends Component {
 
   componentDidMount() {
     if (!this.map) {
-      this.map = new Map('map', this.getGeoJsonUrl(), this.callbacks);
+      this.map = new Map('map', `${process.env.PUBLIC_URL}/data`, this.state.placeType, this.callbacks);
     }
     this.getPlacesAndInitMap();
   }
@@ -65,10 +66,6 @@ class Places extends Component {
     return `${process.env.PUBLIC_URL}/data/${this.state.placeType}`;
   }
 
-  getGeoJsonUrl() {
-    return `${this.getDataBaseUrl()}-medium-geojson.json`;
-  }
-
   getPlacesAndInitMap() {
     axios.get(`${this.getDataBaseUrl()}-data.json`).then(rsp => {
         this.setState({places: rsp.data});
@@ -77,7 +74,7 @@ class Places extends Component {
       .catch(err => {
         console.log(`Error getting place data ${this.state.placeType}`, err);
       });
-    this.map.initMap(this.getGeoJsonUrl());
+    this.map.initMap(this.state.placeType);
   }
 
   getVisitedPlaces() {
@@ -108,6 +105,14 @@ class Places extends Component {
 
   onMapPolygonMouseOut(id) {
     this.setState({mouseOverPlace: null});
+  }
+
+  onMapDataReloaded() {
+    this.state.places.forEach(place => {
+      if (place.visited) {
+        this.map.toggleFeatureSelected(place.id);
+      }
+    });
   }
 
   onMapPolygonClick(id) {
