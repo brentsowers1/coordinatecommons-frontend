@@ -79,7 +79,7 @@ class Places extends Component {
 
   getVisitedPlaces() {
     if (LoggedInUser.isLoggedIn) {
-      ApiClient.getVisitedPlaces(this.state.placeType, 
+      ApiClient.getVisitedPlaces(this.state.placeType, null,
         (response) => {
           const visitedPlacesHash = response.placesVisited.reduce((hash, curPlace) => {
             hash[curPlace.Id] = true;

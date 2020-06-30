@@ -3,7 +3,8 @@ let LoggedInUser = {
   username: null,
   email: null,
   location: null,
-  token: null
+  token: null,
+  sub: null
 };
 
 export default LoggedInUser;

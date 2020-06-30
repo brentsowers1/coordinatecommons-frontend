@@ -63,6 +63,7 @@ class CognitoAuth {
     LoggedInUser.username = payload['cognito:username'];
     LoggedInUser.email = payload['email'];
     LoggedInUser.location = payload['custom:location'];
+    LoggedInUser.sub = payload['sub'];
     console.log(`Successfully logged in user ${LoggedInUser.username}`);
     console.log(`Token is ${accessToken}`);
     this.registerLoggedInUserChangeCallbacks.map(c => c());

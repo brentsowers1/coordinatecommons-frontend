@@ -20,15 +20,20 @@ class ApiClient {
     });
   }
 
-  getVisitedPlaces(placeType, successCallback, errorCallback) {
-    axios({
+  getVisitedPlaces(placeType, userSub, successCallback, errorCallback) {
+    const request = {
       method: 'get',
       url: getUrl('/visit'),
       params: {
         placeType
-      },
-      headers: headers()
-    }).then((response) => {
+      }
+    }
+    if (userSub) {
+      request.params.sub = userSub
+    } else {
+      request.headers = headers()
+    }
+    axios(request).then((response) => {
       console.log('Got visited places');
       successCallback(response.data);
     }).catch((err) => {
