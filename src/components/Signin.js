@@ -3,6 +3,7 @@ import { Container, Row, Col } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import CognitoAuth from '../classes/CognitoAuth';
 import { useHistory } from 'react-router-dom';
+import ApiClient from '../classes/ApiClient';
 
 const Signin = (props) => {
   const history = useHistory();
@@ -21,6 +22,9 @@ const Signin = (props) => {
 
   const handleLoginSuccessCallback = () => {
     setCognitoError(null);
+    ApiClient.saveUserAttributes({
+      LastLogin: new Date().toISOString()
+    });
     history.push('/');
   }
 
