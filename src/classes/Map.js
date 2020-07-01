@@ -87,12 +87,19 @@ export default class Map {
     }
   }
 
-  toggleFeatureSelected(featureId) {
+  // isSelected is optional - if you pass it, it will set the feature to that value (true or false). If not passed in,
+  // the feature will be toggled from the prior value
+  toggleFeatureSelected(featureId, isSelected) {
     if (this.googleMap) {
       const mapFeature = this.googleMap.data.getFeatureById(featureId);
       if (mapFeature) {
-        mapFeature.setProperty('selected', !mapFeature.getProperty('selected'));
+        mapFeature.setProperty('selected', 
+          isSelected === undefined ? !mapFeature.getProperty('selected') : isSelected === true);
+      } else {
+        console.log('no feature');
       }
+    } else {
+      console.log('no map');
     }
   }
   

@@ -15,7 +15,9 @@ class ApiClient {
       successCallback(response.data);
     }).catch((err) => {
       console.error('Error saving visit:', err);
-      errorCallback(err);
+      if (errorCallback) {
+        errorCallback(err);
+      }
     });
   }
 
@@ -38,7 +40,9 @@ class ApiClient {
       successCallback(response.data);
     }).catch((err) => {
       console.error('Error getting visited places:', err);
-      errorCallback(err);
+      if (errorCallback) {
+        errorCallback(err);
+      }
     });
   }
 
@@ -75,10 +79,14 @@ class ApiClient {
     }
     axios(request).then((response) => {
       console.log('Got user attributes');
-      successCallback(response.data);
+      if (successCallback) {
+        successCallback(response.data);
+      }
     }).catch((err) => {
       console.error('Error getting user attributes:', err);
-      errorCallback(err);
+      if (errorCallback) {
+        errorCallback(err);
+      }
     });
   }
 }

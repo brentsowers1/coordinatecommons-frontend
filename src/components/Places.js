@@ -5,7 +5,7 @@ import PlaceList from './PlaceList';
 import './Places.css';
 import axios from 'axios';
 import Map from '../classes/Map';
-import { getFullProperPlaceType } from '../util/place-type-name-utils';
+import { getFullProperPlaceType, getYouveOrUserHas } from '../util/name-utils';
 import ApiClient from '../classes/ApiClient';
 import LoggedInUser from '../classes/LoggedInUser';
 import CognitoAuth from '../classes/CognitoAuth';
@@ -25,7 +25,9 @@ class Places extends Component {
       placeType: props.match.params.placeType ? props.match.params.placeType : 'us-state',
       mouseOverPlace: null,
       lambdaResponse: null,
-      isLoggedIn: LoggedInUser.isLoggedIn
+      isLoggedIn: LoggedInUser.isLoggedIn,
+      username: props.match.params.username,
+      userAttributes: null
     };
     this.callbacks = {
       onMouseOver: this.onMapPolygonMouseOver.bind(this),
@@ -44,17 +46,29 @@ class Places extends Component {
     this.getPlacesAndInitMap();
   }
 
+  // This catches if the props change by the user going to a new URL (like clicking a different place type
+  // from the nav menu)
   static getDerivedStateFromProps(nextProps, prevState) {
+    const derivedState = {};
+
     if (nextProps.match.params.placeType && nextProps.match.params.placeType !== prevState.placeType) {
-      return { placeType: nextProps.match.params.placeType }
+      derivedState.placeType = nextProps.match.params.placeType;
     }
-    return null;
+    if (nextProps.match.params.username && nextProps.match.params.username !== prevState.username) {
+      derivedState.username = nextProps.match.params.username;
+      derivedState.userAttributes = null;
+    }
+    return (derivedState.placeType || derivedState.username) ? derivedState : null;
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.placeType !== this.state.placeType) {
+    if (prevState.placeType !== this.state.placeType || prevState.username !== this.state.username) {
       this.getPlacesAndInitMap();
     }
+  }
+
+  isMyPlaces() {
+    return (!this.state.username || this.state.username === 'my');
   }
 
   loggedInCallback() {
@@ -78,25 +92,41 @@ class Places extends Component {
   }
 
   getVisitedPlaces() {
-    if (LoggedInUser.isLoggedIn) {
-      ApiClient.getVisitedPlaces(this.state.placeType, null,
-        (response) => {
-          const visitedPlacesHash = response.placesVisited.reduce((hash, curPlace) => {
-            hash[curPlace.Id] = true;
-            this.map.toggleFeatureSelected(curPlace.Id);
-            return hash;
-          }, {});
-          const newPlaces = [...this.state.places];
-          newPlaces.forEach(place => {
-            place.visited = visitedPlacesHash[place.id] === true; 
+    if (LoggedInUser.isLoggedIn && this.isMyPlaces()) {
+      ApiClient.getVisitedPlaces(this.state.placeType, null, 
+        this.getVisitedPlacesSuccessCallback.bind(this));
+    } else if (!this.isMyPlaces()) {
+      if (!this.state.userAttributes) {
+        ApiClient.getUserAttributes(this.state.username, 
+          (response) => {
+            this.setState({userAttributes: response});
+            this.getVisitedPlacesForOtherUser();
           });
-          this.setState({places: newPlaces});
-        },
-        (err) => {
-          console.error('Couldn\'t get visited places');
-        }  
-      )
+      } else {
+        this.getVisitedPlacesForOtherUser();
+      }
     }
+  }
+
+  getVisitedPlacesForOtherUser() {
+    // TODO: Add toggling of public access
+    //if (this.state.userAttributes.AllowPublicAccess) {
+      ApiClient.getVisitedPlaces(this.state.placeType, this.state.userAttributes.UserId, 
+        this.getVisitedPlacesSuccessCallback.bind(this));
+    //}
+  }
+
+  getVisitedPlacesSuccessCallback(response) {
+    const visitedPlacesHash = response.placesVisited.reduce((hash, curPlace) => {
+      hash[curPlace.Id] = true;
+      this.map.toggleFeatureSelected(curPlace.Id, true);
+      return hash;
+    }, {});
+    const newPlaces = [...this.state.places];
+    newPlaces.forEach(place => {
+      place.visited = visitedPlacesHash[place.id] === true; 
+    });
+    this.setState({places: newPlaces});
   }
 
   onMapPolygonMouseOver(id) {
@@ -110,28 +140,30 @@ class Places extends Component {
   onMapDataReloaded() {
     this.state.places.forEach(place => {
       if (place.visited) {
-        this.map.toggleFeatureSelected(place.id);
+        this.map.toggleFeatureSelected(place.id, true);
       }
     });
   }
 
   onMapPolygonClick(id) {
-    this.map.toggleFeatureSelected(id);
-    const newPlaces = [...this.state.places];
-    const foundPlace = newPlaces.find(p => p.id === id);
-    if (foundPlace) {
-      foundPlace.visited = !foundPlace.visited;
-      this.setState({places: newPlaces});
-      if (LoggedInUser.isLoggedIn) {
-        ApiClient.saveVisit(id, foundPlace.visited, this.state.placeType, 
-          (response) => {
-            const message = `Successfully called lambda to ${response.visited ? 'save' : 'remove'} visit for place ID ${response.placeId} for user ${response.username}!`;
-            this.setState({lambdaResponse: message});
-          },
-          (err) => {
-            const message = `Error calling the lambda. Check the console for details`;
-            this.setState({lambdaResponse: message});
-          });
+    if (this.isMyPlaces()) {
+      this.map.toggleFeatureSelected(id);
+      const newPlaces = [...this.state.places];
+      const foundPlace = newPlaces.find(p => p.id === id);
+      if (foundPlace) {
+        foundPlace.visited = !foundPlace.visited;
+        this.setState({places: newPlaces});
+        if (LoggedInUser.isLoggedIn) {
+          ApiClient.saveVisit(id, foundPlace.visited, this.state.placeType, 
+            (response) => {
+              const message = `Successfully called lambda to ${response.visited ? 'save' : 'remove'} visit for place ID ${response.placeId} for user ${response.username}!`;
+              this.setState({lambdaResponse: message});
+            },
+            (err) => {
+              const message = `Error calling the lambda. Check the console for details`;
+              this.setState({lambdaResponse: message});
+            });
+        }
       }
     }
   }
@@ -145,7 +177,7 @@ class Places extends Component {
       <Container>
         <Row>
           <Col>
-            {getFullProperPlaceType(this.state.placeType)}
+            {getFullProperPlaceType(this.state.placeType)} that {getYouveOrUserHas(this.state.username, false)} visited
           </Col>
         </Row>
         <Row>
@@ -154,7 +186,10 @@ class Places extends Component {
               <div style={{ height: '100%' }} id='map'></div>
             </div>  
             <div>
-              {this.state.mouseOverPlace ? this.state.mouseOverPlace.name : ''}&nbsp;
+              {this.state.mouseOverPlace ? 
+                this.state.mouseOverPlace.name + (this.state.mouseOverPlace.visited ? ' - VISITED' : ' - NOT VISITED')
+               : 
+                ''}&nbsp;
             </div>
           </Col>
         </Row>
@@ -167,22 +202,28 @@ class Places extends Component {
           : 
           ''
         }
-        {this.state.isLoggedIn ?
-          <Row>
-            <Col md={12}>
-              Click on a place to mark that you've visited that place.
-            </Col>
-          </Row>          
-          :
-          <Row>
-            <Col md={12}>
-              <Link to='/signin'>Sign In</Link> to permanently save places that you click on. If you do not have an account, <Link to='/signup'>Sign Up</Link>!
-            </Col>
-          </Row>
+        {
+          this.isMyPlaces() ?
+            this.state.isLoggedIn ?
+              <Row>
+                <Col md={12}>
+                  Click on a place to mark that you've visited that place.
+                </Col>
+              </Row>          
+            :
+              <Row>
+                <Col md={12}>
+                  <Link to='/signin'>Sign In</Link> to permanently save places that you click on. If you do not have an account, <Link to='/signup'>Sign Up</Link>!
+                </Col>
+              </Row>
+          : 
+            ''
         }        
         <Row>
           <Col sm={12} md={12} lg={12} xl={12} className="no-float">
             <PlaceList
+              isMyPlaces={this.isMyPlaces()}
+              username={this.state.username}
               places={this.state.places}
               placeType={this.state.placeType}
             />

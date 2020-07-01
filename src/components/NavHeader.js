@@ -32,14 +32,14 @@ const NavHeader = () => {
           <Nav.Item>
             <Nav.Link eventKey='/mypage'>My Page</Nav.Link>
           </Nav.Item>
-          <NavDropdown title="Places" id="places-dropdown">
-            <NavDropdown.Item eventKey='/places/us-state'>
+          <NavDropdown title="My Places" id="places-dropdown">
+            <NavDropdown.Item eventKey='/places/my/us-state'>
               US States
             </NavDropdown.Item>
-            <NavDropdown.Item eventKey='/places/canada-state'>
+            <NavDropdown.Item eventKey='/places/my/canada-state'>
               Canadian Provinces
             </NavDropdown.Item>
-            <NavDropdown.Item eventKey='/places/country'>
+            <NavDropdown.Item eventKey='/places/my/country'>
               Countries
             </NavDropdown.Item>
           </NavDropdown>

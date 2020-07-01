@@ -15,7 +15,7 @@ render(
     <NavHeader />
     
     <Route path='/' exact component={Places} />
-    <Route path='/places/:placeType' component={Places} />
+    <Route path='/places/:username/:placeType' component={Places} />
     <Route path='/mypage' component={MyPage} />
     <Route path='/about' component={About} />
     <Route path='/signin' component={Signin} />

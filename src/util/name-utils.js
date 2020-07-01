@@ -26,3 +26,7 @@ export const getFullProperPlaceType = (placeType) => {
       return '';
   }  
 }
+
+export const getYouveOrUserHas = (username, capitalize) => {
+  return !username || username === 'my' ? (capitalize ? 'You\'ve' : 'you\'ve') : username + ' has';
+}
