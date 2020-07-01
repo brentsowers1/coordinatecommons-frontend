@@ -18,12 +18,10 @@ const About = () => (
     <ul>
       <li>Persisting the login - ability to remember device</li>
       <li>Forgot username and/or password functionality</li>
-      <li>Making the permanent URLs for subpages work (like /app/verify)</li>
-      <li>More/less precise places on the map when you zoom in/out</li>
+      <li>More efficient loading of high res GeoJSON - currently this can cause the map to hang for several seconds</li>
       <li>Counties</li>
-      <li>A "My Page" that lists all of your places across place types</li>
+      <li>A "My Page" that lists all of your places across place types, and give you links to share with others</li>
       <li>Properly styled user interface</li>
-      <li>A shareable page of your places that doesn't require you to log in</li>
       <li>Leaderboards</li>
       <li>Defining your own categories to classify visits</li>
       <li>Other place types like highways, cities, and mountains</li>
