@@ -58,14 +58,18 @@ export default class Map {
           this.googleMap.data.forEach((feature) => {
             this.googleMap.data.remove(feature);  
           });
-          this.googleMap.data.loadGeoJson(newGeoJsonUrl, null, (features) => {
+          this.googleMap.data.loadGeoJson(newGeoJsonUrl, null, () => {
             if (this.callbacks && this.callbacks.onDataReloaded) {
               this.callbacks.onDataReloaded();
             }
           });
         }
       });
-      this.googleMap.data.loadGeoJson(this.geoJsonUrl());
+      this.googleMap.data.loadGeoJson(this.geoJsonUrl(), null, () => {
+        if (this.callbacks && this.callbacks.onDataReloaded) {
+          this.callbacks.onDataReloaded();
+        }
+      });
       this.googleMap.data.setStyle(setFeatureStyle);
       this.googleMap.data.addListener('click', (event) => {
         if (this.callbacks && this.callbacks.onClick) {
@@ -95,11 +99,7 @@ export default class Map {
       if (mapFeature) {
         mapFeature.setProperty('selected', 
           isSelected === undefined ? !mapFeature.getProperty('selected') : isSelected === true);
-      } else {
-        console.log('no feature');
       }
-    } else {
-      console.log('no map');
     }
   }
   
