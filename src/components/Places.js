@@ -5,7 +5,8 @@ import PlaceList from './PlaceList';
 import './Places.css';
 import axios from 'axios';
 import Map from '../classes/Map';
-import { getFullProperPlaceType, getYouveOrUserHas } from '../util/name-utils';
+import { getYouveOrUserHas, getFullProperPlaceType } from '../util/name-utils';
+import printPercent from '../util/printPercent';
 import ApiClient from '../classes/ApiClient';
 import LoggedInUser from '../classes/LoggedInUser';
 import CognitoAuth from '../classes/CognitoAuth';
@@ -173,11 +174,15 @@ class Places extends Component {
   }
 
   render() {
+    const visitedPlaces = this.state.places.filter(p => p.visited);
     return (
       <Container>
         <Row>
           <Col>
-            {getFullProperPlaceType(this.state.placeType)} that {getYouveOrUserHas(this.state.username, false)} visited
+            <h4 class='text-center'>
+              {getYouveOrUserHas(this.state.username, true)} visited {visitedPlaces.length} out of {this.state.places.length}&nbsp;
+              {getFullProperPlaceType(this.state.placeType, false)} - {printPercent(visitedPlaces.length, this.state.places.length)}
+            </h4>          
           </Col>
         </Row>
         <Row>
@@ -204,21 +209,20 @@ class Places extends Component {
         }
         {
           this.isMyPlaces() ?
-            this.state.isLoggedIn ?
-              <Row>
-                <Col md={12}>
-                  Click on a place to mark that you've visited that place.
-                </Col>
-              </Row>          
-            :
-              <Row>
-                <Col md={12}>
-                  <Link to='/signin'>Sign In</Link> to permanently save places that you click on. If you do not have an account, <Link to='/signup'>Sign Up</Link>!
-                </Col>
-              </Row>
-          : 
+            <Row>
+              <Col md={12}>
+                Click on the map to mark that you've visited that place. Click on My Places at the top for different types of places.<br />
+                {this.state.isLoggedIn ? '' : 
+                  <React.Fragment>
+                    <Link to='/signin'>Sign In</Link> to permanently save places that you click on. If you do not have an account, <Link to='/signup'>Sign Up</Link>!
+                  </React.Fragment>
+                }
+              </Col>
+            </Row>
+          :
             ''
         }        
+        <hr />
         <Row>
           <Col sm={12} md={12} lg={12} xl={12} className="no-float">
             <PlaceList

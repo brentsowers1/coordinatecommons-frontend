@@ -1,6 +1,5 @@
 import React from 'react';
-import printPercent from '../util/printPercent';
-import { getPlaceTypeLastWord, getYouveOrUserHas } from '../util/name-utils';
+import { getPlaceTypeLastWord } from '../util/name-utils';
 import { Container, Row, Col } from 'react-bootstrap';
 
 const PlaceList = (props) => {
@@ -9,17 +8,11 @@ const PlaceList = (props) => {
   return (
     <Container>
       <Row>
-        <Col md={12}>
-          {getYouveOrUserHas(props.username, true)} visited {visitedPlaces.length} out of {props.places.length} {placeTypeName} - 
-            &nbsp;{printPercent(visitedPlaces.length, props.places.length)}                
-        </Col>
-      </Row>
-      <Row>
         <Col md={6}>
-          Visited {placeTypeName}
+          <p><u>Visited {placeTypeName}</u></p>
         </Col>
         <Col md={6}>
-          Unvisited {placeTypeName}
+          <p><u>Unvisited {placeTypeName}</u></p>
         </Col>
       </Row>
       <Row>

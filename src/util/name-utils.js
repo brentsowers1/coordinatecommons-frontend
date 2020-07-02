@@ -12,16 +12,30 @@ export const getPlaceTypeLastWord = (placeType) => {
   }
 }
 
-export const getFullProperPlaceType = (placeType) => {
+export const getPlaceTypeLastWordSingular = (placeType) => {
   switch (placeType) {
     case 'us-state': 
-      return 'US States';
     case 'mexico-state':
-      return 'Mexican Sates';
+      return 'state';
     case 'canada-state':
-      return 'Canadian Provinces';
+      return 'province';
     case 'country':
-      return 'Countries';
+      return 'country';
+    default:
+      return '';
+  }  
+}
+
+export const getFullProperPlaceType = (placeType, capitalize) => {
+  switch (placeType) {
+    case 'us-state': 
+      return capitalize ? 'US States' : 'US states';
+    case 'mexico-state':
+      return capitalize ? 'Mexican States' : 'Mexican states';
+    case 'canada-state':
+      return capitalize ? 'Canadian Provinces' : 'Canadian provinces';
+    case 'country':
+      return capitalize ? 'Countries' : 'countries';
     default:
       return '';
   }  
