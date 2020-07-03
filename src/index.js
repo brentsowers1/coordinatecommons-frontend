@@ -16,7 +16,7 @@ render(
     
     <Route path='/' exact component={Places} />
     <Route path='/places/:username/:placeType' component={Places} />
-    <Route path='/mypage' component={MyPage} />
+    <Route path='/mypage/:username' component={MyPage} />
     <Route path='/about' component={About} />
     <Route path='/signin' component={Signin} />
     <Route path='/logout' component={Logout} />

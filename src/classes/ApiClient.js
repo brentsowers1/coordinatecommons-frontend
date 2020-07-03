@@ -24,9 +24,10 @@ class ApiClient {
   getVisitedPlaces(placeType, userSub, successCallback, errorCallback) {
     const request = {
       method: 'get',
-      params: {
-        placeType
-      }
+      params: {}
+    }
+    if (placeType) {
+      request.params.placeType = placeType;
     }
     if (userSub) {
       request.params.sub = userSub;

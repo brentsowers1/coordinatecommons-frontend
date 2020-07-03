@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
 import PlaceList from './PlaceList';
+import SignInOrUpPrompt from './SignInOrUpPrompt';
 import './Places.css';
 import axios from 'axios';
 import Map from '../classes/Map';
@@ -179,7 +179,7 @@ class Places extends Component {
       <Container>
         <Row>
           <Col>
-            <h4 class='text-center'>
+            <h4 className='text-center'>
               {getYouveOrUserHas(this.state.username, true)} visited {visitedPlaces.length} out of {this.state.places.length}&nbsp;
               {getFullProperPlaceType(this.state.placeType, false)} - {printPercent(visitedPlaces.length, this.state.places.length)}
             </h4>          
@@ -213,9 +213,7 @@ class Places extends Component {
               <Col md={12}>
                 Click on the map to mark that you've visited that place. Click on My Places at the top for different types of places.<br />
                 {this.state.isLoggedIn ? '' : 
-                  <React.Fragment>
-                    <Link to='/signin'>Sign In</Link> to permanently save places that you click on. If you do not have an account, <Link to='/signup'>Sign Up</Link>!
-                  </React.Fragment>
+                  <SignInOrUpPrompt />
                 }
               </Col>
             </Row>

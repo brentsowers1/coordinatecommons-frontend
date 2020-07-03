@@ -30,7 +30,7 @@ const NavHeader = () => {
             <Nav.Link eventKey='/about'>About</Nav.Link>
           </Nav.Item>
           <Nav.Item>
-            <Nav.Link eventKey='/mypage'>My Page</Nav.Link>
+            <Nav.Link eventKey='/mypage/my'>My Page</Nav.Link>
           </Nav.Item>
           <NavDropdown title="My Places" id="places-dropdown">
             <NavDropdown.Item eventKey='/places/my/us-state'>
