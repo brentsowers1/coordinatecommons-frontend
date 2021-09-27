@@ -1,27 +1,30 @@
 import React, { useState } from 'react';
 import { Container } from 'react-bootstrap';
-import LoggedInUser from '../classes/LoggedInUser';
 import SignInOrUpPrompt from './SignInOrUpPrompt';
 import ApiClient from '../classes/ApiClient';
 import { getFullProperPlaceType } from '../util/name-utils';
 import { Link } from 'react-router-dom';
+import { useIsLoggedIn, useUsername, useToken } from '../sharedState/LoggedInUser';
 
 const MyPage = (props) => {
   const [isFetchingPlaces, setIsFetchingPlaces] = useState(false);
   const [places, setPlaces] = useState(null);
+  const [isLoggedIn] = useIsLoggedIn();
+  const [loggedInUsername] = useUsername();
+  const [token] = useToken();
 
   const username = props.match.params.username ? props.match.params.username : 'my';
   const isMy = username === 'my';
 
   const allPlaceTypes = ['us-state', 'canada-state', 'country'];
 
-  if (isMy && !LoggedInUser.isLoggedIn) {
+  if (isMy && !isLoggedIn) {
     return (<Container><SignInOrUpPrompt /></Container>);
   }
 
   if (!isFetchingPlaces && places === null) {
     // TODO: Add support for other users
-    ApiClient.getVisitedPlaces(null, null, (response) => {
+    ApiClient.getVisitedPlaces(token, null, null, (response) => {
       setIsFetchingPlaces(false);
       if (response.places !== undefined) {
         setPlaces(response.places);  
@@ -45,7 +48,7 @@ const MyPage = (props) => {
               <tr>
                 <th>Place Type</th>
                 <th>Places Visited</th>
-                {isMy && LoggedInUser.isLoggedIn ? 
+                {isMy && isLoggedIn ? 
                   <React.Fragment>
                     <th>Edit Link</th><th>Share Link</th>                  
                   </React.Fragment> 
@@ -57,7 +60,7 @@ const MyPage = (props) => {
                 const thesePlaces = places.find(p => p.PlaceType === pt);
                 const visitedCount = thesePlaces && thesePlaces.PlacesVisited ? thesePlaces.PlacesVisited.length : 0;
                 const viewLink = '/places/' + username + '/' + pt;
-                const shareLink = LoggedInUser.isLoggedIn ? '/places/' + LoggedInUser.username + '/' + pt : null;
+                const shareLink = isLoggedIn ? '/places/' + loggedInUsername + '/' + pt : null;
                 return (
                   <tr>
                     <td>
@@ -69,7 +72,7 @@ const MyPage = (props) => {
                     <td>
                       {isMy || visitedCount ? <Link to={viewLink}>{ 'https://' + window.location.hostname + viewLink}</Link> : ''}
                     </td>
-                    {isMy && LoggedInUser.isLoggedIn ?
+                    {isMy && isLoggedIn ?
                       <td>
                         <Link to={shareLink}>{'https://' + window.location.hostname + shareLink}</Link>
                       </td>
