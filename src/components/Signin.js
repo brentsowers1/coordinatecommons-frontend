@@ -11,7 +11,7 @@ const Signin = (props) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [cognitoError, setCognitoError] = useState(null); 
-  const [isLoggedIn, setIsLoggedIn] = useIsLoggedIn();
+  const [, setIsLoggedIn] = useIsLoggedIn();
   const [, setSharedUsername] = useUsername();
   const [, setToken] = useToken();
   const [, setEmail] = useEmail();

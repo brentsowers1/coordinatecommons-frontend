@@ -9,6 +9,7 @@ import { getYouveOrUserHas, getFullProperPlaceType } from '../util/name-utils';
 import printPercent from '../util/printPercent';
 import ApiClient from '../classes/ApiClient';
 import { useIsLoggedIn, useToken } from '../sharedState/LoggedInUser';
+import useAsyncReference from '../util/useAsyncRef';
 
 // I tried making this class a functional component. But because of the callbacks that are needed for maps (when
 // polygons are clicked), and auth (when logged in), the only way I could get things to work was a lot of hacks, 
@@ -18,8 +19,8 @@ import { useIsLoggedIn, useToken } from '../sharedState/LoggedInUser';
 // providers, reducers, etc
 
 const PlacesFunctional = (props) => {
-  const [places, setPlaces] = useState([]);
-  const [placeType, setPlaceType] = useState(props.match.params.placeType ? props.match.params.placeType : 'us-state');
+  const [places, setPlaces] = useAsyncReference([]);
+  const [placeType] = useState(props.match.params.placeType ? props.match.params.placeType : 'us-state');
   const prevPlaceType = useRef(placeType);
   const [mouseOverPlace, setMouseOverPlace] = useState(null);
   const [lambdaResponse, setLambdaResponse] = useState(null);
@@ -28,7 +29,7 @@ const PlacesFunctional = (props) => {
   const [username] = useState(props.match.params.username);
   const prevUsername = useRef(username);
   const [userAttributes, setUserAttributes] = useState(null);
-  const [map, setMap] = useState(null);
+  const map = useRef(null);
   const firstRenderForMap = useRef(true);
   const firstRenderForVisitedPlaces = useRef(true);
 
@@ -39,16 +40,73 @@ const PlacesFunctional = (props) => {
   }
   }, [username, props.match.params.username]);
   
+  const isMyPlaces = () => {
+    return (!username || username === 'my');
+  }  
+
+  const getDataBaseUrl = () => {
+    return `${process.env.PUBLIC_URL}/data/${placeType}`;
+  }
+
+  const getPlacesAndInitMap = () => {
+    axios.get(`${getDataBaseUrl()}-data.json`).then(rsp => {
+        setPlaces(rsp.data);
+        getVisitedPlaces();
+      })
+      .catch(err => {
+        console.log(`Error getting place data ${placeType}`, err);
+      });
+    map.current.initMap(placeType);
+  }
+
+  // TODO - maybe this would be better as a function outside of the component that takes everything in as parameters?
+  // So have it take isLoggedIn, username, token, placeType, userAttributes, etc?
+  // or make this a useEffect, listening for places to be changed?
+  const getVisitedPlaces = () => {
+    if (isLoggedIn && isMyPlaces()) {
+      ApiClient.getVisitedPlaces(token, placeType, null, getVisitedPlacesSuccessCallback);
+    } else if (!isMyPlaces()) {
+      if (!userAttributes) {
+        ApiClient.getUserAttributes(token, username, 
+          (response) => {
+            setUserAttributes(response);
+            // Todo - user attributes are still null when this function runs. Either make it a ref or pass it around
+            getVisitedPlacesForOtherUser();
+          });
+      } else {
+        getVisitedPlacesForOtherUser();
+      }
+    }
+  }
+
+  const getVisitedPlacesForOtherUser = () => {
+    // TODO: Add toggling of public access
+    ApiClient.getVisitedPlaces(token, placeType, userAttributes.UserId, getVisitedPlacesSuccessCallback);
+  }
+
+  const getVisitedPlacesSuccessCallback = (response) => {
+    const visitedPlacesHash = response.placesVisited.reduce((hash, curPlace) => {
+      hash[curPlace.Id] = true;
+      map.current.toggleFeatureSelected(curPlace.Id, true);
+      return hash;
+    }, {});
+    const newPlaces = [...places.current];
+    newPlaces.forEach(place => {
+      place.visited = visitedPlacesHash[place.id] === true; 
+    });
+    setPlaces(newPlaces);
+  }
+
   // Load the map the first time
   useEffect(() => {
-    if (!map) {
-        setMap(new Map('map', `${process.env.PUBLIC_URL}/data`, placeType, mapCallbacks));
+    if (!map.current) {
+        map.current = new Map('map', `${process.env.PUBLIC_URL}/data`, placeType, mapCallbacks);
     }
     if (firstRenderForMap.current) {
       getPlacesAndInitMap();
       firstRenderForMap.current = false;
     }
-  }, [map, placeType]);
+  }, [placeType, map]);
 
   // This catches if the URL is manually set
   useEffect(() =>  {
@@ -66,59 +124,6 @@ const PlacesFunctional = (props) => {
     }
   }, [isLoggedIn]);
 
-  const isMyPlaces = () => {
-    return (!username || username === 'my');
-  }  
-
-  const getDataBaseUrl = () => {
-    return `${process.env.PUBLIC_URL}/data/${placeType}`;
-  }
-
-  const getPlacesAndInitMap = () => {
-    axios.get(`${getDataBaseUrl()}-data.json`).then(rsp => {
-        setPlaces(rsp.data);
-        getVisitedPlaces();
-      })
-      .catch(err => {
-        console.log(`Error getting place data ${placeType}`, err);
-      });
-    map.initMap(placeType);
-  }
-
-  const getVisitedPlaces = () => {
-    if (isLoggedIn && isMyPlaces()) {
-      ApiClient.getVisitedPlaces(token, placeType, null, getVisitedPlacesSuccessCallback);
-    } else if (!isMyPlaces()) {
-      if (!userAttributes) {
-        ApiClient.getUserAttributes(token, username, 
-          (response) => {
-            setUserAttributes(response);
-            getVisitedPlacesForOtherUser();
-          });
-      } else {
-        getVisitedPlacesForOtherUser();
-      }
-    }
-  }
-
-  const getVisitedPlacesForOtherUser = () => {
-    // TODO: Add toggling of public access
-    ApiClient.getVisitedPlaces(token, placeType, userAttributes.UserId, getVisitedPlacesSuccessCallback);
-  }
-
-  const getVisitedPlacesSuccessCallback = (response) => {
-    const visitedPlacesHash = response.placesVisited.reduce((hash, curPlace) => {
-      hash[curPlace.Id] = true;
-      map.toggleFeatureSelected(curPlace.Id, true);
-      return hash;
-    }, {});
-    const newPlaces = [...places];
-    newPlaces.forEach(place => {
-      place.visited = visitedPlacesHash[place.id] === true; 
-    });
-    setPlaces(newPlaces);
-  }
-
   const onMapPolygonMouseOver = (id) => {
     setMouseOverPlace(getPlaceFromId(id));
   }
@@ -128,17 +133,17 @@ const PlacesFunctional = (props) => {
   }
 
   const onMapDataReloaded = () => {
-    places.forEach(place => {
+    places.current.forEach(place => {
       if (place.visited) {
-        map.toggleFeatureSelected(place.id, true);
+        map.current.toggleFeatureSelected(place.id, true);
       }
     });
   }
 
   const onMapPolygonClick = (id) => {
     if (isMyPlaces()) {
-      map.toggleFeatureSelected(id);
-      const newPlaces = [...places];
+      map.current.toggleFeatureSelected(id);
+      const newPlaces = [...places.current];
       const foundPlace = newPlaces.find(p => p.id === id);
       if (foundPlace) {
         foundPlace.visited = !foundPlace.visited;
@@ -166,68 +171,68 @@ const PlacesFunctional = (props) => {
   };  
 
   const getPlaceFromId = (id) => {
-    return places.find(p => p.id === id);
+    return places.current.find(p => p.id === id);
   }
 
-  const visitedPlaces = places.filter(p => p.visited);
-    return (
-      <Container>
+  const visitedPlaces = places.current.filter(p => p.visited);
+  return (
+    <Container>
+      <Row>
+        <Col>
+          <h4 className='text-center'>
+            {getYouveOrUserHas(username, true)} visited {visitedPlaces.length} out of {places.current.length}&nbsp;
+            {getFullProperPlaceType(placeType, false)} - {printPercent(visitedPlaces.length, places.current.length)}
+          </h4>          
+        </Col>
+      </Row>
+      <Row>
+        <Col sm={12} md={12} lg={12} xl={12} className="no-float">
+          <div style={{ height: '500px'}}>
+            <div style={{ height: '100%' }} id='map'></div>
+          </div>  
+          <div>
+            {mouseOverPlace ? 
+              mouseOverPlace.name + (mouseOverPlace.visited ? ' - VISITED' : ' - NOT VISITED')
+              : 
+              ''}&nbsp;
+          </div>
+        </Col>
+      </Row>
+      {lambdaResponse ? 
         <Row>
-          <Col>
-            <h4 className='text-center'>
-              {getYouveOrUserHas(username, true)} visited {visitedPlaces.length} out of {places.length}&nbsp;
-              {getFullProperPlaceType(placeType, false)} - {printPercent(visitedPlaces.length, places.length)}
-            </h4>          
+          <Col md={12}>
+            {lambdaResponse}
           </Col>
         </Row>
-        <Row>
-          <Col sm={12} md={12} lg={12} xl={12} className="no-float">
-            <div style={{ height: '500px'}}>
-              <div style={{ height: '100%' }} id='map'></div>
-            </div>  
-            <div>
-              {mouseOverPlace ? 
-                mouseOverPlace.name + (mouseOverPlace.visited ? ' - VISITED' : ' - NOT VISITED')
-               : 
-                ''}&nbsp;
-            </div>
-          </Col>
-        </Row>
-        {lambdaResponse ? 
+        : 
+        ''
+      }
+      {
+        isMyPlaces() ?
           <Row>
             <Col md={12}>
-              {lambdaResponse}
+              Click on the map to mark that you've visited that place. Click on My Places at the top for different types of places.<br />
+              {isLoggedIn ? '' : 
+                <SignInOrUpPrompt />
+              }
             </Col>
           </Row>
-          : 
+        :
           ''
-        }
-        {
-          isMyPlaces() ?
-            <Row>
-              <Col md={12}>
-                Click on the map to mark that you've visited that place. Click on My Places at the top for different types of places.<br />
-                {isLoggedIn ? '' : 
-                  <SignInOrUpPrompt />
-                }
-              </Col>
-            </Row>
-          :
-            ''
-        }        
-        <hr />
-        <Row>
-          <Col sm={12} md={12} lg={12} xl={12} className="no-float">
-            <PlaceList
-              isMyPlaces={isMyPlaces()}
-              username={username}
-              places={places}
-              placeType={placeType}
-            />
-          </Col>          
-        </Row>
-      </Container>
-    );
+      }        
+      <hr />
+      <Row>
+        <Col sm={12} md={12} lg={12} xl={12} className="no-float">
+          <PlaceList
+            isMyPlaces={isMyPlaces()}
+            username={username}
+            places={places.current}
+            placeType={placeType}
+          />
+        </Col>          
+      </Row>
+    </Container>
+  );
 };
 
 export default PlacesFunctional;

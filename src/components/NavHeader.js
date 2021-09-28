@@ -5,7 +5,7 @@ import { useIsLoggedIn, useUsername } from '../sharedState/LoggedInUser';
 
 const NavHeader = () => {
   const history = useHistory();
-  const [isLoggedIn, setIsLoggedIn] = useIsLoggedIn();
+  const [isLoggedIn] = useIsLoggedIn();
   const [username] = useUsername();
   
   const handleNavSelect = (eventKey) => {

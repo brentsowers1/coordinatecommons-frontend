@@ -1,4 +1,9 @@
 import React, { useState } from 'react';
+import { Container, Row, Col } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
+import SignupForm from './SignupForm';
+import VerificationForm from './VerificationForm';
+import CognitoAuth from '../classes/CognitoAuth';
 
 const SignupFunctional = (props) => {
   const [cognitoError, setCognitoError] = useState(null);
@@ -37,7 +42,7 @@ const SignupFunctional = (props) => {
       setCognitoError(err.message);
       setCognitoVerificationSuccess(false);
     } else {
-      setCognitoError(null),
+      setCognitoError(null);
       setCognitoVerificationSuccess(true);
     }    
   }
