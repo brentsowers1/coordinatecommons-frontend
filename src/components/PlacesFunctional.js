@@ -9,17 +9,11 @@ import { getYouveOrUserHas, getFullProperPlaceType } from '../util/name-utils';
 import printPercent from '../util/printPercent';
 import ApiClient from '../classes/ApiClient';
 import { useIsLoggedIn, useToken } from '../sharedState/LoggedInUser';
-import useAsyncReference from '../util/useAsyncRef';
 
-// I tried making this class a functional component. But because of the callbacks that are needed for maps (when
-// polygons are clicked), and auth (when logged in), the only way I could get things to work was a lot of hacks, 
-// using refs, and getting around the concept of local state. The end result was bad and flaky. The class based
-// component is fine and works great. Other than the binding to this being confusing, I think a class based 
-// component for something complex like this component is best, better than a functional component with 
-// providers, reducers, etc
-
+// Known issues - URL changing between different types of places doesn't trigger a change, need to
+// find out why
 const PlacesFunctional = (props) => {
-  const [places, setPlaces] = useAsyncReference([]);
+  const [places, setPlaces] = useState([]);
   const [placeType] = useState(props.match.params.placeType ? props.match.params.placeType : 'us-state');
   const prevPlaceType = useRef(placeType);
   const [mouseOverPlace, setMouseOverPlace] = useState(null);
@@ -50,8 +44,7 @@ const PlacesFunctional = (props) => {
 
   const getPlacesAndInitMap = () => {
     axios.get(`${getDataBaseUrl()}-data.json`).then(rsp => {
-        setPlaces(rsp.data);
-        getVisitedPlaces();
+        getVisitedPlaces(rsp.data);
       })
       .catch(err => {
         console.log(`Error getting place data ${placeType}`, err);
@@ -59,38 +52,34 @@ const PlacesFunctional = (props) => {
     map.current.initMap(placeType);
   }
 
-  // TODO - maybe this would be better as a function outside of the component that takes everything in as parameters?
-  // So have it take isLoggedIn, username, token, placeType, userAttributes, etc?
-  // or make this a useEffect, listening for places to be changed?
-  const getVisitedPlaces = () => {
+  const getVisitedPlaces = (placesOverride) => {
     if (isLoggedIn && isMyPlaces()) {
-      ApiClient.getVisitedPlaces(token, placeType, null, getVisitedPlacesSuccessCallback);
+      ApiClient.getVisitedPlaces(token, placeType, null, 
+        (response) => getVisitedPlacesSuccessCallback(response, placesOverride));
     } else if (!isMyPlaces()) {
       if (!userAttributes) {
         ApiClient.getUserAttributes(token, username, 
           (response) => {
             setUserAttributes(response);
-            // Todo - user attributes are still null when this function runs. Either make it a ref or pass it around
-            getVisitedPlacesForOtherUser();
+            ApiClient.getVisitedPlaces(token, placeType, response.UserId, 
+              (response) => getVisitedPlacesSuccessCallback(response, placesOverride));
           });
       } else {
-        getVisitedPlacesForOtherUser();
+        ApiClient.getVisitedPlaces(token, placeType, userAttributes.UserId, 
+          (response) => getVisitedPlacesSuccessCallback(response, placesOverride));
       }
+    } else if (placesOverride) {
+      setPlaces(placesOverride);
     }
   }
 
-  const getVisitedPlacesForOtherUser = () => {
-    // TODO: Add toggling of public access
-    ApiClient.getVisitedPlaces(token, placeType, userAttributes.UserId, getVisitedPlacesSuccessCallback);
-  }
-
-  const getVisitedPlacesSuccessCallback = (response) => {
+  const getVisitedPlacesSuccessCallback = (response, placesOverride) => {
     const visitedPlacesHash = response.placesVisited.reduce((hash, curPlace) => {
       hash[curPlace.Id] = true;
       map.current.toggleFeatureSelected(curPlace.Id, true);
       return hash;
     }, {});
-    const newPlaces = [...places.current];
+    const newPlaces = placesOverride ? [...placesOverride] : [...places];
     newPlaces.forEach(place => {
       place.visited = visitedPlacesHash[place.id] === true; 
     });
@@ -108,6 +97,15 @@ const PlacesFunctional = (props) => {
     }
   }, [placeType, map]);
 
+  // Need to update the callbacks to the map class any time any state value changes,
+  // since the map will keep references to older versions of the functions with stale
+  // state values
+  useEffect(() => {
+    if (map) {
+      map.current.updateCallbacks(mapCallbacks);
+    } 
+  })
+
   // This catches if the URL is manually set
   useEffect(() =>  {
     if (prevPlaceType.current !== placeType || prevUsername.current !== username) {
@@ -118,9 +116,10 @@ const PlacesFunctional = (props) => {
   }, [placeType, username]);
 
   useEffect(() => {
-    if (!firstRenderForVisitedPlaces.current) {
-      getVisitedPlaces();
+    if (firstRenderForVisitedPlaces.current) {
       firstRenderForVisitedPlaces.current = false;
+    } else {
+      getVisitedPlaces(null);
     }
   }, [isLoggedIn]);
 
@@ -133,7 +132,7 @@ const PlacesFunctional = (props) => {
   }
 
   const onMapDataReloaded = () => {
-    places.current.forEach(place => {
+    places.forEach(place => {
       if (place.visited) {
         map.current.toggleFeatureSelected(place.id, true);
       }
@@ -143,7 +142,7 @@ const PlacesFunctional = (props) => {
   const onMapPolygonClick = (id) => {
     if (isMyPlaces()) {
       map.current.toggleFeatureSelected(id);
-      const newPlaces = [...places.current];
+      const newPlaces = [...places];
       const foundPlace = newPlaces.find(p => p.id === id);
       if (foundPlace) {
         foundPlace.visited = !foundPlace.visited;
@@ -171,17 +170,17 @@ const PlacesFunctional = (props) => {
   };  
 
   const getPlaceFromId = (id) => {
-    return places.current.find(p => p.id === id);
+    return places.find(p => p.id === id);
   }
 
-  const visitedPlaces = places.current.filter(p => p.visited);
+  const visitedPlaces = places.filter(p => p.visited);
   return (
     <Container>
       <Row>
         <Col>
           <h4 className='text-center'>
-            {getYouveOrUserHas(username, true)} visited {visitedPlaces.length} out of {places.current.length}&nbsp;
-            {getFullProperPlaceType(placeType, false)} - {printPercent(visitedPlaces.length, places.current.length)}
+            {getYouveOrUserHas(username, true)} visited {visitedPlaces.length} out of {places.length}&nbsp;
+            {getFullProperPlaceType(placeType, false)} - {printPercent(visitedPlaces.length, places.length)}
           </h4>          
         </Col>
       </Row>
@@ -226,7 +225,7 @@ const PlacesFunctional = (props) => {
           <PlaceList
             isMyPlaces={isMyPlaces()}
             username={username}
-            places={places.current}
+            places={places}
             placeType={placeType}
           />
         </Col>          
