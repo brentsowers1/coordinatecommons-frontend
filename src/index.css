@@ -5,3 +5,13 @@ body {
 .list-group-item {
   word-wrap: break-word;
 }
+
+.extra-padding {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.big-padding {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}

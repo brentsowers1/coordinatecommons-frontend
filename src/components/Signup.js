@@ -50,16 +50,17 @@ const Signup = (props) => {
   return (
     <Container>
       <h1>Sign Up For Coordinate Commons</h1>        
-      <div>
+      <div className="big-padding">
         Already have an account? <Link to='/signin'>Sign In Here!</Link>
       </div>
       {loadVerificationPage ? '' : 
-        <div>
+        <div className="big-padding">
           Already signed up and have a verification code? <Link to='/verify'>Enter It Here!</Link>
         </div>
       }
       {cognitoVerificationSuccess ?
-        <div>Successfully signed up and verified! Please <Link to='/signin'>Sign In</Link> with your email address and password.</div>
+        <div className="big-padding">Successfully signed up and verified
+         Please <Link to='/signin'>Sign In</Link> with your email address and password.</div>
         : 
         loadVerificationPage ?
           <VerificationForm 

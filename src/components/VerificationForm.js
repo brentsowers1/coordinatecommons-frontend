@@ -10,7 +10,7 @@ const VerificationForm = (props) => {
       event.preventDefault();
       props.onSubmit(username, code);
     }}>
-      <Row>
+      <Row className="extra-padding">
         {props.transitionFromSignup ?
           <Col md={12}>
             Registration successful. Please check your email inbox or spam folder for your verification code from no-reply@verificationemail.com, enter it below, and submit.
@@ -21,7 +21,7 @@ const VerificationForm = (props) => {
           </Col>
        }
       </Row>  
-      <Row>
+      <Row className="extra-padding">
         <Col md={2}>
           <label htmlFor='email'>Username:</label>
         </Col>
@@ -29,7 +29,7 @@ const VerificationForm = (props) => {
           <input name='email' type='text' value={username} onChange={(e) => setUsername(e.target.value)} required />
         </Col>
       </Row>
-      <Row>
+      <Row className="extra-padding">
         <Col md={2}>
           <label htmlFor='code'>Verification Code:</label><br />
         </Col>
@@ -37,7 +37,7 @@ const VerificationForm = (props) => {
           <input name='code' type='text' onChange={(e) => setCode(e.target.value)} required />
         </Col>
       </Row>
-      <Row>
+      <Row className="extra-padding">
         <Col md={3}>
           <input type='submit' value='Verify' />
         </Col>
