@@ -29,7 +29,7 @@ const Signin = (props) => {
 
   const handleLoginSuccessCallback = (token, successUsername, email, location, sub) => {
     setCognitoError(null);
-    ApiClient.saveUserAttributes({
+    ApiClient.saveUserAttributes(token, {
       LastLogin: new Date().toISOString()
     });
     setIsLoggedIn(true);
