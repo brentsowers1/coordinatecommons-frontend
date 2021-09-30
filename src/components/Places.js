@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import PlaceList from './PlaceList';
 import SignInOrUpPrompt from './SignInOrUpPrompt';
@@ -8,232 +8,239 @@ import Map from '../classes/Map';
 import { getYouveOrUserHas, getFullProperPlaceType } from '../util/name-utils';
 import printPercent from '../util/printPercent';
 import ApiClient from '../classes/ApiClient';
-import LoggedInUser from '../classes/LoggedInUser';
-import CognitoAuth from '../classes/CognitoAuth';
+import { useIsLoggedIn, useToken } from '../sharedState/LoggedInUser';
 
-// I tried making this class a functional component. But because of the callbacks that are needed for maps (when
-// polygons are clicked), and auth (when logged in), the only way I could get things to work was a lot of hacks, 
-// using refs, and getting around the concept of local state. The end result was bad and flaky. The class based
-// component is fine and works great. Other than the binding to this being confusing, I think a class based 
-// component for something complex like this component is best, better than a functional component with 
-// providers, reducers, etc
+const Places = (props) => {
+  const [places, setPlaces] = useState([]);
+  const [placeType, setPlaceType] = useState(props.match.params.placeType ? props.match.params.placeType : 'us-state');
+  const prevPlaceType = useRef(placeType);
+  const [mouseOverPlace, setMouseOverPlace] = useState(null);
+  const [lambdaResponse, setLambdaResponse] = useState(null);
+  const [isLoggedIn] = useIsLoggedIn();
+  const [token] = useToken();
+  const [username, setUsername] = useState(props.match.params.username);
+  const prevUsername = useRef(username);
+  const [userAttributes, setUserAttributes] = useState(null);
+  const map = useRef(null);
+  const firstRenderForMap = useRef(true);
+  const firstRenderForVisitedPlaces = useRef(true);
 
-class Places extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      places: [],
-      placeType: props.match.params.placeType ? props.match.params.placeType : 'us-state',
-      mouseOverPlace: null,
-      lambdaResponse: null,
-      isLoggedIn: LoggedInUser.isLoggedIn,
-      username: props.match.params.username,
-      userAttributes: null
-    };
-    this.callbacks = {
-      onMouseOver: this.onMapPolygonMouseOver.bind(this),
-      onMouseOut: this.onMapPolygonMouseOut.bind(this),
-      onClick: this.onMapPolygonClick.bind(this),
-      onDataReloaded: this.onMapDataReloaded.bind(this)
-    };
+  // Catches if the username is manually changed in the URL, blank out the user attributes
+  useEffect(() => {
+    if (props.match.params.username !== username) {
+      setUserAttributes(null);
+  }
+  }, [username, props.match.params.username]);
   
-    CognitoAuth.registerLoggedInUserChangeCallback(this.loggedInCallback.bind(this));    
+  const isMyPlaces = () => {
+    return (!username || username === 'my');
+  }  
+
+  const getDataBaseUrl = () => {
+    return `${process.env.PUBLIC_URL}/data/${placeType}`;
   }
 
-  componentDidMount() {
-    if (!this.map) {
-      this.map = new Map('map', `${process.env.PUBLIC_URL}/data`, this.state.placeType, this.callbacks);
-    }
-    this.getPlacesAndInitMap();
-  }
-
-  // This catches if the props change by the user going to a new URL (like clicking a different place type
-  // from the nav menu)
-  static getDerivedStateFromProps(nextProps, prevState) {
-    const derivedState = {};
-
-    if (nextProps.match.params.placeType && nextProps.match.params.placeType !== prevState.placeType) {
-      derivedState.placeType = nextProps.match.params.placeType;
-    }
-    if (nextProps.match.params.username && nextProps.match.params.username !== prevState.username) {
-      derivedState.username = nextProps.match.params.username;
-      derivedState.userAttributes = null;
-    }
-    return (derivedState.placeType || derivedState.username) ? derivedState : null;
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.placeType !== this.state.placeType || prevState.username !== this.state.username) {
-      this.getPlacesAndInitMap();
-    }
-  }
-
-  isMyPlaces() {
-    return (!this.state.username || this.state.username === 'my');
-  }
-
-  loggedInCallback() {
-    this.setState({isLoggedIn: LoggedInUser.isLoggedIn});
-    this.getVisitedPlaces();
-  };  
-
-  getDataBaseUrl() {
-    return `${process.env.PUBLIC_URL}/data/${this.state.placeType}`;
-  }
-
-  getPlacesAndInitMap() {
-    axios.get(`${this.getDataBaseUrl()}-data.json`).then(rsp => {
-        this.setState({places: rsp.data});
-        this.getVisitedPlaces();
+  const getPlacesAndInitMap = () => {
+    axios.get(`${getDataBaseUrl()}-data.json`).then(rsp => {
+        getVisitedPlaces(rsp.data);
       })
       .catch(err => {
-        console.log(`Error getting place data ${this.state.placeType}`, err);
+        console.log(`Error getting place data ${placeType}`, err);
       });
-    this.map.initMap(this.state.placeType);
+    map.current.initMap(placeType);
   }
 
-  getVisitedPlaces() {
-    if (LoggedInUser.isLoggedIn && this.isMyPlaces()) {
-      ApiClient.getVisitedPlaces(this.state.placeType, null, 
-        this.getVisitedPlacesSuccessCallback.bind(this));
-    } else if (!this.isMyPlaces()) {
-      if (!this.state.userAttributes) {
-        ApiClient.getUserAttributes(this.state.username, 
+  const getVisitedPlaces = (placesOverride) => {
+    if (isLoggedIn && isMyPlaces()) {
+      ApiClient.getVisitedPlaces(token, placeType, null, 
+        (response) => getVisitedPlacesSuccessCallback(response, placesOverride));
+    } else if (!isMyPlaces()) {
+      if (!userAttributes) {
+        ApiClient.getUserAttributes(token, username, 
           (response) => {
-            this.setState({userAttributes: response});
-            this.getVisitedPlacesForOtherUser();
+            setUserAttributes(response);
+            ApiClient.getVisitedPlaces(token, placeType, response.UserId, 
+              (response) => getVisitedPlacesSuccessCallback(response, placesOverride));
           });
       } else {
-        this.getVisitedPlacesForOtherUser();
+        ApiClient.getVisitedPlaces(token, placeType, userAttributes.UserId, 
+          (response) => getVisitedPlacesSuccessCallback(response, placesOverride));
       }
+    } else if (placesOverride) {
+      setPlaces(placesOverride);
     }
   }
 
-  getVisitedPlacesForOtherUser() {
-    // TODO: Add toggling of public access
-    //if (this.state.userAttributes.AllowPublicAccess) {
-      ApiClient.getVisitedPlaces(this.state.placeType, this.state.userAttributes.UserId, 
-        this.getVisitedPlacesSuccessCallback.bind(this));
-    //}
-  }
-
-  getVisitedPlacesSuccessCallback(response) {
+  const getVisitedPlacesSuccessCallback = (response, placesOverride) => {
     const visitedPlacesHash = response.placesVisited.reduce((hash, curPlace) => {
       hash[curPlace.Id] = true;
-      this.map.toggleFeatureSelected(curPlace.Id, true);
+      map.current.toggleFeatureSelected(curPlace.Id, true);
       return hash;
     }, {});
-    const newPlaces = [...this.state.places];
+    const newPlaces = placesOverride ? [...placesOverride] : [...places];
     newPlaces.forEach(place => {
       place.visited = visitedPlacesHash[place.id] === true; 
     });
-    this.setState({places: newPlaces});
+    setPlaces(newPlaces);
   }
 
-  onMapPolygonMouseOver(id) {
-    this.setState({mouseOverPlace: this.getPlaceFromId(id)});
+  // Load the map the first time
+  useEffect(() => {
+    if (!map.current) {
+        map.current = new Map('map', `${process.env.PUBLIC_URL}/data`, placeType, mapCallbacks);
+    }
+    if (firstRenderForMap.current) {
+      getPlacesAndInitMap();
+      firstRenderForMap.current = false;
+    }
+  }, [placeType, map]);
+
+  // This is needed to update the callbacks to the map class any time any state value changes,
+  // since the map will keep references to older versions of the functions with stale state values
+  useEffect(() => {
+    if (map) {
+      map.current.updateCallbacks(mapCallbacks);
+    } 
+  })
+
+  // This catches if the URL is manually set
+  useEffect(() =>  {
+    if (prevPlaceType.current !== placeType || prevUsername.current !== username) {
+      getPlacesAndInitMap();
+      prevPlaceType.current = placeType;
+      prevUsername.current = username;
+    }
+  }, [placeType, username]);
+
+  // Catches if the user logs in or out
+  useEffect(() => {
+    if (firstRenderForVisitedPlaces.current) {
+      firstRenderForVisitedPlaces.current = false;
+    } else {
+      getVisitedPlaces(null);
+    }
+  }, [isLoggedIn]);
+
+  // These two catch when the URL changes to a different place or username, like if the user clicks to load a 
+  // different type of place (which just changes the URL)
+  useEffect(() => {
+    if (props.match.params.placeType) {
+      setPlaceType(props.match.params.placeType);
+    }
+  }, [props.match.params.placeType]);
+  useEffect(() => {
+    setUsername(props.match.params.username);
+  }, [props.match.params.username]);
+
+  const onMapPolygonMouseOver = (id) => {
+    setMouseOverPlace(getPlaceFromId(id));
   }
 
-  onMapPolygonMouseOut(id) {
-    this.setState({mouseOverPlace: null});
+  const onMapPolygonMouseOut = (id) => {
+    setMouseOverPlace(null);
   }
 
-  onMapDataReloaded() {
-    this.state.places.forEach(place => {
+  const onMapDataReloaded = () => {
+    places.forEach(place => {
       if (place.visited) {
-        this.map.toggleFeatureSelected(place.id, true);
+        map.current.toggleFeatureSelected(place.id, true);
       }
     });
   }
 
-  onMapPolygonClick(id) {
-    if (this.isMyPlaces()) {
-      this.map.toggleFeatureSelected(id);
-      const newPlaces = [...this.state.places];
+  const onMapPolygonClick = (id) => {
+    if (isMyPlaces()) {
+      map.current.toggleFeatureSelected(id);
+      const newPlaces = [...places];
       const foundPlace = newPlaces.find(p => p.id === id);
       if (foundPlace) {
         foundPlace.visited = !foundPlace.visited;
-        this.setState({places: newPlaces});
-        if (LoggedInUser.isLoggedIn) {
-          ApiClient.saveVisit(id, foundPlace.visited, this.state.placeType, 
+        setPlaces(newPlaces);
+        if (isLoggedIn) {
+          ApiClient.saveVisit(token, id, foundPlace.visited, placeType, 
             (response) => {
               const message = `Successfully called lambda to ${response.visited ? 'save' : 'remove'} visit for place ID ${response.placeId} for user ${response.username}!`;
-              this.setState({lambdaResponse: message});
+              setLambdaResponse(message);
             },
             (err) => {
               const message = `Error calling the lambda. Check the console for details`;
-              this.setState({lambdaResponse: message});
+              setLambdaResponse(message);
             });
         }
       }
     }
   }
 
-  getPlaceFromId(id) {
-    return this.state.places.find(p => p.id === id);
+  const mapCallbacks = {
+    onMouseOver: onMapPolygonMouseOver,
+    onMouseOut: onMapPolygonMouseOut,
+    onClick: onMapPolygonClick,
+    onDataReloaded: onMapDataReloaded
+  };  
+
+  const getPlaceFromId = (id) => {
+    return places.find(p => p.id === id);
   }
 
-  render() {
-    const visitedPlaces = this.state.places.filter(p => p.visited);
-    return (
-      <Container>
+  const visitedPlaces = places.filter(p => p.visited);
+  return (
+    <Container>
+      <Row>
+        <Col>
+          <h4 className='text-center'>
+            {getYouveOrUserHas(username, true)} visited {visitedPlaces.length} out of {places.length}&nbsp;
+            {getFullProperPlaceType(placeType, false)} - {printPercent(visitedPlaces.length, places.length)}
+          </h4>          
+        </Col>
+      </Row>
+      <Row>
+        <Col sm={12} md={12} lg={12} xl={12} className="no-float">
+          <div style={{ height: '500px'}}>
+            <div style={{ height: '100%' }} id='map'></div>
+          </div>  
+          <div>
+            {mouseOverPlace ? 
+              mouseOverPlace.name + (mouseOverPlace.visited ? ' - VISITED' : ' - NOT VISITED')
+              : 
+              ''}&nbsp;
+          </div>
+        </Col>
+      </Row>
+      {lambdaResponse ? 
         <Row>
-          <Col>
-            <h4 className='text-center'>
-              {getYouveOrUserHas(this.state.username, true)} visited {visitedPlaces.length} out of {this.state.places.length}&nbsp;
-              {getFullProperPlaceType(this.state.placeType, false)} - {printPercent(visitedPlaces.length, this.state.places.length)}
-            </h4>          
+          <Col md={12}>
+            {lambdaResponse}
           </Col>
         </Row>
-        <Row>
-          <Col sm={12} md={12} lg={12} xl={12} className="no-float">
-            <div style={{ height: '500px'}}>
-              <div style={{ height: '100%' }} id='map'></div>
-            </div>  
-            <div>
-              {this.state.mouseOverPlace ? 
-                this.state.mouseOverPlace.name + (this.state.mouseOverPlace.visited ? ' - VISITED' : ' - NOT VISITED')
-               : 
-                ''}&nbsp;
-            </div>
-          </Col>
-        </Row>
-        {this.state.lambdaResponse ? 
+        : 
+        ''
+      }
+      {
+        isMyPlaces() ?
           <Row>
             <Col md={12}>
-              {this.state.lambdaResponse}
+              Click on the map to mark that you've visited that place. Click on My Places at the top for different types of places.<br />
+              {isLoggedIn ? '' : 
+                <SignInOrUpPrompt />
+              }
             </Col>
           </Row>
-          : 
+        :
           ''
-        }
-        {
-          this.isMyPlaces() ?
-            <Row>
-              <Col md={12}>
-                Click on the map to mark that you've visited that place. Click on My Places at the top for different types of places.<br />
-                {this.state.isLoggedIn ? '' : 
-                  <SignInOrUpPrompt />
-                }
-              </Col>
-            </Row>
-          :
-            ''
-        }        
-        <hr />
-        <Row>
-          <Col sm={12} md={12} lg={12} xl={12} className="no-float">
-            <PlaceList
-              isMyPlaces={this.isMyPlaces()}
-              username={this.state.username}
-              places={this.state.places}
-              placeType={this.state.placeType}
-            />
-          </Col>          
-        </Row>
-      </Container>
-    );
-  }
+      }        
+      <hr />
+      <Row>
+        <Col sm={12} md={12} lg={12} xl={12} className="no-float">
+          <PlaceList
+            isMyPlaces={isMyPlaces()}
+            username={username}
+            places={places}
+            placeType={placeType}
+          />
+        </Col>          
+      </Row>
+    </Container>
+  );
 };
 
 export default Places;
