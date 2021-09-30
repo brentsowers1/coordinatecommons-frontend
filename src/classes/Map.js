@@ -37,6 +37,10 @@ export default class Map {
     window[`initMap${this.instanceNumber}`] = null;    
   }
 
+  updateCallbacks(callbacks) {
+    this.callbacks = callbacks;
+  }
+
   initMap(placeType) {
     if (placeType) {
       this.placeType = placeType;

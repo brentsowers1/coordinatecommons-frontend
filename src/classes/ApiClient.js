@@ -1,15 +1,14 @@
-import LoggedInUser from './LoggedInUser';
 import axios from 'axios';
 import config from '../config';
 
 class ApiClient {
 
-  saveVisit(placeId, visited, placeType, successCallback, errorCallback) {
+  saveVisit(token, placeId, visited, placeType, successCallback, errorCallback) {
     axios({
       method: 'post',
       url: getUrl('/visit'),
       data: { placeId, placeType, visited },
-      headers: headers()
+      headers: headers(token)
     }).then((response) => {
       console.log('Successfully saved visit');
       successCallback(response.data);
@@ -21,7 +20,7 @@ class ApiClient {
     });
   }
 
-  getVisitedPlaces(placeType, userSub, successCallback, errorCallback) {
+  getVisitedPlaces(token, placeType, userSub, successCallback, errorCallback) {
     const request = {
       method: 'get',
       params: {}
@@ -33,7 +32,7 @@ class ApiClient {
       request.params.sub = userSub;
       request.url = getUrl('/visit-public');
     } else {
-      request.headers = headers()
+      request.headers = headers(token)
       request.url = getUrl('/visit');
     }
     axios(request).then((response) => {
@@ -47,12 +46,12 @@ class ApiClient {
     });
   }
 
-  saveUserAttributes(attributes, successCallback, errorCallback) {
+  saveUserAttributes(token, attributes, successCallback, errorCallback) {
     axios({
       method: 'post',
       url: getUrl('/user-attribute'),
       data: attributes,
-      headers: headers()
+      headers: headers(token)
     }).then((response) => {
       console.log('Successfully saved user attributes');
       if (successCallback) {
@@ -66,7 +65,7 @@ class ApiClient {
     });    
   }
 
-  getUserAttributes(username, successCallback, errorCallback) {
+  getUserAttributes(token, username, successCallback, errorCallback) {
     const request = {
       method: 'get',
       params: {}
@@ -75,7 +74,7 @@ class ApiClient {
       request.params.username = username;
       request.url = getUrl('/user-attribute-public');
     } else {
-      request.headers = headers()
+      request.headers = headers(token)
       request.url = getUrl('/user-attribute');
     }
     axios(request).then((response) => {
@@ -92,9 +91,9 @@ class ApiClient {
   }
 }
 
-const headers = () => {
+const headers = (token) => {
   return {
-    Authorization: LoggedInUser.token
+    Authorization: token
   };
 }
 

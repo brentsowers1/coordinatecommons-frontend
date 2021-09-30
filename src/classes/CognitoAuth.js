@@ -1,4 +1,3 @@
-import LoggedInUser from './LoggedInUser';
 import config from '../config';
 const AmazonCognitoIdentity = require('amazon-cognito-identity-js');
 
@@ -12,7 +11,6 @@ class CognitoAuth {
     if (typeof window.AWSCognito !== 'undefined') {
       window.AWSCognito.config.region = config.cognito.region;
     }
-    this.registerLoggedInUserChangeCallbacks = [];
   }
 
   signup(username, email, location, password, signupCallback) {
@@ -42,33 +40,19 @@ class CognitoAuth {
     });
   }
 
-  logout() {
-    if (LoggedInUser.isLoggedIn) {
-      const cognitoUser = getCognitoUser(this.userPool, LoggedInUser.username);
-      cognitoUser.signOut();
-      LoggedInUser.isLoggedIn = false;
-      this.registerLoggedInUserChangeCallbacks.map(c => c());      
-    }
-  }
-
-  registerLoggedInUserChangeCallback(loggedInUserChangeCallback) {
-    this.registerLoggedInUserChangeCallbacks.push(loggedInUserChangeCallback);
+  logout(username) {
+    const cognitoUser = getCognitoUser(this.userPool, username);
+    cognitoUser.signOut();
   }
 
   localAuthenticationSuccessCallback(successCallback, errorCallback, result) {
     const accessToken = result.getIdToken().getJwtToken();
     const payload = result.getIdToken().decodePayload();
-    LoggedInUser.isLoggedIn = true;
-    LoggedInUser.token = accessToken;
-    LoggedInUser.username = payload['cognito:username'];
-    LoggedInUser.email = payload['email'];
-    LoggedInUser.location = payload['custom:location'];
-    LoggedInUser.sub = payload['sub'];
-    console.log(`Successfully logged in user ${LoggedInUser.username}`);
+    const username = payload['cognito:username'];
+    console.log(`Successfully logged in user ${username}`);
     console.log(`Token is ${accessToken}`);
-    this.registerLoggedInUserChangeCallbacks.map(c => c());
 
-    successCallback();
+    successCallback(accessToken, username, payload['email'], payload['custom:location'], payload['sub']);
   }
   
 };
@@ -86,7 +70,5 @@ const generateDataAttribute = (attributeName, attributeValue) => {
     Value: attributeValue
   });
 };
-
-
 
 export default CognitoAuth = new CognitoAuth();

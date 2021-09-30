@@ -1,106 +1,87 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import SignupForm from './SignupForm';
 import VerificationForm from './VerificationForm';
 import CognitoAuth from '../classes/CognitoAuth';
 
-// Can't make this a functional component because of the callbacks from auth. I could possibly pass
-// variables in to the callbacks, and rely on the state not changing between now and when the auth
-// callbacks pass, but I feel this is more straightforward and makes more sense.
+const Signup = (props) => {
+  const [cognitoError, setCognitoError] = useState(null);
+  const [loadVerificationPage, setLoadVerificationPage] = useState(props.verify === true);
+  const [cognitoSignupSuccess, setCognitoSignupSuccess] = useState(false);
+  const [cognitoVerificationSuccess, setCognitoVerificationSuccess] = useState(false);
+  const [username, setUsername] = useState('');
 
-class Signup extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      cognitoError: null,
-      loadVerificationPage: props.verify === true,
-      cognitoSignupSuccess: false,
-      cognitoVerificationSuccess: false,
-      username: ''
-    };
+  const handleSignupSubmit = (formUsername, formEmail, formLocation, formPassword) => {
+    setUsername(formUsername);
+    CognitoAuth.signup(formUsername, formEmail, formLocation, formPassword, signupCallback);
   }
-
-  handleSignupSubmit(username, email, location, password) {
-    this.setState({username: username});
-    CognitoAuth.signup(username, email, location, password, this.signupCallback.bind(this));
-  }
-
-  signupCallback(err, result) {
+   
+  const signupCallback = (err, result) => {
     if (err && err.message) {
       console.log("Cognito error:");
       console.log(err);
-      this.setState({
-        cognitoError: err.message,
-        cognitoSignupSuccess: false,
-        loadVerificationPage: false
-      });
+      setCognitoError(err.message);
+      setCognitoSignupSuccess(false);
+      setLoadVerificationPage(false);
     } else {
-      this.setState({
-        cognitoError: null,
-        cognitoSignupSuccess: true,
-        loadVerificationPage: true
-      });
+      setCognitoError(null);
+      setCognitoSignupSuccess(true);
+      setLoadVerificationPage(true);
     }
   }
-
-  handleVerificationSubmit(username, code) {
-    CognitoAuth.verify(username, code, this.verificationCallback.bind(this));
+    
+  const handleVerificationSubmit = (username, code) => {
+    CognitoAuth.verify(username, code, verificationCallback);
   }
-
-  verificationCallback(err, result) {
+    
+  const verificationCallback = (err, result) => {
     if (err && err.message) {
       console.log("Cognito error:");
       console.log(err);
-      this.setState({
-        cognitoError: err.message,
-        cognitoVerificationSuccess: false
-      });      
+      setCognitoError(err.message);
+      setCognitoVerificationSuccess(false);
     } else {
-      this.setState({
-        cognitoError: null,
-        cognitoVerificationSuccess: true
-      });
+      setCognitoError(null);
+      setCognitoVerificationSuccess(true);
     }    
   }
-
-  render() {
-    return (
-      <Container>
-        <h1>Sign Up For Coordinate Commons</h1>        
+    
+  return (
+    <Container>
+      <h1>Sign Up For Coordinate Commons</h1>        
+      <div>
+        Already have an account? <Link to='/signin'>Sign In Here!</Link>
+      </div>
+      {loadVerificationPage ? '' : 
         <div>
-          Already have an account? <Link to='/signin'>Sign In Here!</Link>
+          Already signed up and have a verification code? <Link to='/verify'>Enter It Here!</Link>
         </div>
-        {this.state.loadVerificationPage ? '' : 
-          <div>
-            Already signed up and have a verification code? <Link to='/verify'>Enter It Here!</Link>
-          </div>
-        }
-        {this.state.cognitoVerificationSuccess ?
-          <div>Successfully signed up and verified! Please <Link to='/signin'>Sign In</Link> with your email address and password.</div>
-          : 
-          this.state.loadVerificationPage ?
-            <VerificationForm 
-              onSubmit={this.handleVerificationSubmit.bind(this)}
-              username={this.state.username}
-              transitionFromSignup={this.state.cognitoSignupSuccess} />
-            :
-            <SignupForm 
-              onSubmit={this.handleSignupSubmit.bind(this)} />
-        }
-        <Row>
-          <Col md={5}>
-            {this.state.cognitoError ? 
-              <div>
-                <div>Error attempting to create account:</div>
-                <div>{this.state.cognitoError}</div>
-              </div> : ''
-            }
-          </Col>
-        </Row>        
-      </Container>
-    );
-  }
+      }
+      {cognitoVerificationSuccess ?
+        <div>Successfully signed up and verified! Please <Link to='/signin'>Sign In</Link> with your email address and password.</div>
+        : 
+        loadVerificationPage ?
+          <VerificationForm 
+            onSubmit={handleVerificationSubmit}
+            username={username}
+            transitionFromSignup={cognitoSignupSuccess} />
+          :
+          <SignupForm 
+            onSubmit={handleSignupSubmit} />
+      }
+      <Row>
+        <Col md={5}>
+          {cognitoError ? 
+            <div>
+              <div>Error attempting to create account:</div>
+              <div>{cognitoError}</div>
+            </div> : ''
+          }
+        </Col>
+      </Row>        
+    </Container>
+  );
 };
 
 export default Signup;

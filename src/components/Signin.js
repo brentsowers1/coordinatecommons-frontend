@@ -4,12 +4,19 @@ import { Link } from 'react-router-dom';
 import CognitoAuth from '../classes/CognitoAuth';
 import { useHistory } from 'react-router-dom';
 import ApiClient from '../classes/ApiClient';
+import { useEmail, useIsLoggedIn, useUserLocation, useSub, useToken, useUsername } from '../sharedState/LoggedInUser';
 
 const Signin = (props) => {
   const history = useHistory();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [cognitoError, setCognitoError] = useState(null); 
+  const [, setIsLoggedIn] = useIsLoggedIn();
+  const [, setSharedUsername] = useUsername();
+  const [, setToken] = useToken();
+  const [, setEmail] = useEmail();
+  const [, setUserLocation] = useUserLocation();
+  const [, setSub] = useSub();
   
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -20,11 +27,17 @@ const Signin = (props) => {
       handleLoginFailureCallback);
   }
 
-  const handleLoginSuccessCallback = () => {
+  const handleLoginSuccessCallback = (token, successUsername, email, location, sub) => {
     setCognitoError(null);
     ApiClient.saveUserAttributes({
       LastLogin: new Date().toISOString()
     });
+    setIsLoggedIn(true);
+    setSharedUsername(successUsername);
+    setToken(token);
+    setEmail(email);
+    setUserLocation(location);
+    setSub(sub);
     history.push('/');
   }
 
