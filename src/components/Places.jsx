@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import PlaceList from './PlaceList';
 import SignInOrUpPrompt from './SignInOrUpPrompt';
@@ -37,7 +37,7 @@ const Places = (props) => {
   }  
 
   const getDataBaseUrl = () => {
-    return `${process.env.PUBLIC_URL}/data/${placeType}`;
+    return `${import.meta.env.BASE_URL}data/${placeType}`;
   }
 
   const getPlacesAndInitMap = () => {
@@ -87,7 +87,7 @@ const Places = (props) => {
   // Load the map the first time
   useEffect(() => {
     if (!map.current) {
-        map.current = new Map('map', `${process.env.PUBLIC_URL}/data`, placeType, mapCallbacks);
+        map.current = new Map('map', `${import.meta.env.BASE_URL}data`, placeType, mapCallbacks);
     }
     if (firstRenderForMap.current) {
       getPlacesAndInitMap();

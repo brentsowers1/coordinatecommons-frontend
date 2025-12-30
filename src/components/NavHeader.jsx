@@ -1,4 +1,3 @@
-import React from 'react';
 import { Container, Nav, NavDropdown, Navbar } from 'react-bootstrap';
 import { Link, useHistory } from "react-router-dom";
 import { useIsLoggedIn, useUsername } from '../sharedState/LoggedInUser';

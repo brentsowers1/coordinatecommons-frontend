@@ -1,5 +1,4 @@
-import React from 'react';
-import { render } from 'react-dom';
+import ReactDOM from 'react-dom';
 import './index.css';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import NavHeader from './components/NavHeader';
@@ -10,7 +9,7 @@ import Signin from './components/Signin';
 import Signup from './components/Signup';
 import Logout from './components/Logout';
 
-render(
+ReactDOM.render(
   <Router basename='/app'>
     <NavHeader />
     

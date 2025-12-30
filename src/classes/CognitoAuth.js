@@ -1,5 +1,5 @@
 import config from '../config';
-const AmazonCognitoIdentity = require('amazon-cognito-identity-js');
+import { AuthenticationDetails, CognitoUser, CognitoUserAttribute, CognitoUserPool } from 'amazon-cognito-identity-js';
 
 class CognitoAuth {
   constructor() {
@@ -7,7 +7,7 @@ class CognitoAuth {
       UserPoolId: config.cognito.userPoolId,
       ClientId: config.cognito.userPoolClientId
     };    
-    this.userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+    this.userPool = new CognitoUserPool(poolData);
     if (typeof window.AWSCognito !== 'undefined') {
       window.AWSCognito.config.region = config.cognito.region;
     }
@@ -33,7 +33,7 @@ class CognitoAuth {
       Username: username,
       Password: password
     };
-    const authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails(authenticationData);    
+    const authenticationDetails = new AuthenticationDetails(authenticationData);    
     cognitoUser.authenticateUser(authenticationDetails, {
       onSuccess: this.localAuthenticationSuccessCallback.bind(this, successCallback, failureCallback),
       onFailure: failureCallback
@@ -58,14 +58,14 @@ class CognitoAuth {
 };
 
 const getCognitoUser = (pool, username) => {
-  return new AmazonCognitoIdentity.CognitoUser({
+  return new CognitoUser({
     Username: username,
     Pool: pool
   });
 };  
 
 const generateDataAttribute = (attributeName, attributeValue) => {
-  return new AmazonCognitoIdentity.CognitoUserAttribute({
+  return new CognitoUserAttribute({
     Name: attributeName,
     Value: attributeValue
   });

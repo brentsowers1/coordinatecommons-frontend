@@ -1,4 +1,3 @@
-import React from 'react';
 import CognitoAuth from '../classes/CognitoAuth';
 import { useHistory } from "react-router-dom";
 import { useIsLoggedIn, useUsername } from '../sharedState/LoggedInUser';
