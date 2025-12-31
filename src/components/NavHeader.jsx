@@ -28,7 +28,9 @@ const NavHeader = () => {
           </Nav.Item>
           {isLoggedIn ?
             <Nav.Item>
-              <Nav.Link as="span" className="nav-link">Welcome {username}! (<Nav.Link as={Link} to='/logout'>Log Out</Nav.Link>)</Nav.Link>
+              <Nav.Link as="span" className="nav-link">
+                Welcome {username}! (<Link to='/logout'>Log Out</Link>)
+              </Nav.Link>
             </Nav.Item>          
             :
             <Nav.Item>
