@@ -1,17 +1,17 @@
 import CognitoAuth from '../classes/CognitoAuth';
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useIsLoggedIn, useUsername } from '../sharedState/LoggedInUser';
 
 const Logout = () => {
   const [isLoggedIn, setIsLoggedIn] = useIsLoggedIn();
   const [username] = useUsername();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   if (isLoggedIn) {
     CognitoAuth.logout(username);
     setIsLoggedIn(false);
   }
-  history.push('/');
+  navigate('/');
   return (
     <div></div>
   );

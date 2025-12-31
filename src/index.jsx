@@ -1,6 +1,6 @@
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import './index.css';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import NavHeader from './components/NavHeader';
 import MyPage from './components/MyPage';
 import Places from './components/Places';
@@ -9,18 +9,19 @@ import Signin from './components/Signin';
 import Signup from './components/Signup';
 import Logout from './components/Logout';
 
-ReactDOM.render(
+const root = createRoot(document.getElementById('root'));
+root.render(
   <Router basename='/app'>
     <NavHeader />
-    
-    <Route path='/' exact component={Places} />
-    <Route path='/places/:username/:placeType' component={Places} />
-    <Route path='/mypage/:username' component={MyPage} />
-    <Route path='/about' component={About} />
-    <Route path='/signin' component={Signin} />
-    <Route path='/logout' component={Logout} />
-    <Route path='/signup' component={Signup} />
-    <Route path='/verify' render={() => <Signup verify={true} />} />
-  </Router>,
-  document.getElementById('root')
+    <Routes>
+      <Route path='/' element={<Places />} />
+      <Route path='/places/:username/:placeType' element={<Places />} />
+      <Route path='/mypage/:username' element={<MyPage />} />
+      <Route path='/about' element={<About />} />
+      <Route path='/signin' element={<Signin />} />
+      <Route path='/logout' element={<Logout />} />
+      <Route path='/signup' element={<Signup />} />
+      <Route path='/verify' element={<Signup verify={true} />} />
+    </Routes>
+  </Router>
 );

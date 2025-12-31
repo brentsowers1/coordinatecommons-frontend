@@ -1,14 +1,14 @@
 import { Container, Nav, NavDropdown, Navbar } from 'react-bootstrap';
-import { Link, useHistory } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useIsLoggedIn, useUsername } from '../sharedState/LoggedInUser';
 
 const NavHeader = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const [isLoggedIn] = useIsLoggedIn();
   const [username] = useUsername();
   
   const handleNavSelect = (eventKey) => {
-    history.push(eventKey);
+    navigate(eventKey);
   }
 
   return (
