@@ -23,8 +23,3 @@ src/scripts/geojson-data/*
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-# amplify
-.amplify
-amplify_outputs*
-amplifyconfiguration*
