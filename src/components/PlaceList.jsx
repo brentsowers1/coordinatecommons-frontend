@@ -1,4 +1,3 @@
-import React from 'react';
 import { getPlaceTypeLastWord } from '../util/name-utils';
 import { Container, Row, Col } from 'react-bootstrap';
 

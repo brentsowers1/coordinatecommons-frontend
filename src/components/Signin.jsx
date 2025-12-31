@@ -1,13 +1,12 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import CognitoAuth from '../classes/CognitoAuth';
-import { useHistory } from 'react-router-dom';
 import ApiClient from '../classes/ApiClient';
 import { useEmail, useIsLoggedIn, useUserLocation, useSub, useToken, useUsername } from '../sharedState/LoggedInUser';
 
 const Signin = (props) => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [cognitoError, setCognitoError] = useState(null); 
@@ -38,7 +37,7 @@ const Signin = (props) => {
     setEmail(email);
     setUserLocation(location);
     setSub(sub);
-    history.push('/');
+    navigate('/');
   }
 
   const handleLoginFailureCallback = (err) => {
