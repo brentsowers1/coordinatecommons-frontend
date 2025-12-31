@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
 import { Container } from 'react-bootstrap';
+import { useParams, Link } from 'react-router-dom';
 import SignInOrUpPrompt from './SignInOrUpPrompt';
 import ApiClient from '../classes/ApiClient';
 import { getFullProperPlaceType } from '../util/name-utils';
-import { Link } from 'react-router-dom';
 import { useIsLoggedIn, useUsername, useToken } from '../sharedState/LoggedInUser';
 
 const MyPage = (props) => {
+  const params = useParams();
   const [isFetchingPlaces, setIsFetchingPlaces] = useState(false);
   const [places, setPlaces] = useState(null);
   const [isLoggedIn] = useIsLoggedIn();
   const [loggedInUsername] = useUsername();
   const [token] = useToken();
 
-  const username = props.match.params.username ? props.match.params.username : 'my';
+  const username = params.username ? params.username : 'my';
   const isMy = username === 'my';
 
   const allPlaceTypes = ['us-state', 'canada-state', 'country'];

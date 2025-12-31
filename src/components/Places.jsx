@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { Container, Row, Col } from 'react-bootstrap';
 import PlaceList from './PlaceList';
 import SignInOrUpPrompt from './SignInOrUpPrompt';
@@ -11,14 +12,15 @@ import ApiClient from '../classes/ApiClient';
 import { useIsLoggedIn, useToken } from '../sharedState/LoggedInUser';
 
 const Places = (props) => {
+  const params = useParams();
   const [places, setPlaces] = useState([]);
-  const [placeType, setPlaceType] = useState(props.match.params.placeType ? props.match.params.placeType : 'us-state');
+  const [placeType, setPlaceType] = useState(params.placeType ? params.placeType : 'us-state');
   const prevPlaceType = useRef(placeType);
   const [mouseOverPlace, setMouseOverPlace] = useState(null);
   const [lambdaResponse, setLambdaResponse] = useState(null);
   const [isLoggedIn] = useIsLoggedIn();
   const [token] = useToken();
-  const [username, setUsername] = useState(props.match.params.username);
+  const [username, setUsername] = useState(params.username);
   const prevUsername = useRef(username);
   const [userAttributes, setUserAttributes] = useState(null);
   const map = useRef(null);
@@ -27,10 +29,10 @@ const Places = (props) => {
 
   // Catches if the username is manually changed in the URL, blank out the user attributes
   useEffect(() => {
-    if (props.match.params.username !== username) {
+    if (params.username !== username) {
       setUserAttributes(null);
   }
-  }, [username, props.match.params.username]);
+  }, [username, params.username]);
   
   const isMyPlaces = () => {
     return (!username || username === 'my');
@@ -124,13 +126,13 @@ const Places = (props) => {
   // These two catch when the URL changes to a different place or username, like if the user clicks to load a 
   // different type of place (which just changes the URL)
   useEffect(() => {
-    if (props.match.params.placeType) {
-      setPlaceType(props.match.params.placeType);
+    if (params.placeType) {
+      setPlaceType(params.placeType);
     }
-  }, [props.match.params.placeType]);
+  }, [params.placeType]);
   useEffect(() => {
-    setUsername(props.match.params.username);
-  }, [props.match.params.username]);
+    setUsername(params.username);
+  }, [params.username]);
 
   const onMapPolygonMouseOver = (id) => {
     setMouseOverPlace(getPlaceFromId(id));

@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import './index.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import NavHeader from './components/NavHeader';
 import MyPage from './components/MyPage';
@@ -8,6 +9,7 @@ import About from './components/About';
 import Signin from './components/Signin';
 import Signup from './components/Signup';
 import Logout from './components/Logout';
+
 
 const root = createRoot(document.getElementById('root'));
 root.render(
