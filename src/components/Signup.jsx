@@ -17,7 +17,7 @@ const Signup = (props) => {
     CognitoAuth.signup(formUsername, formEmail, formLocation, formPassword, signupCallback);
   }
    
-  const signupCallback = (err, result) => {
+  const signupCallback = (err) => {
     if (err && err.message) {
       console.log("Cognito error:");
       console.log(err);
@@ -35,7 +35,7 @@ const Signup = (props) => {
     CognitoAuth.verify(username, code, verificationCallback);
   }
     
-  const verificationCallback = (err, result) => {
+  const verificationCallback = (err) => {
     if (err && err.message) {
       console.log("Cognito error:");
       console.log(err);

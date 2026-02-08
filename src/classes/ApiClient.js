@@ -52,7 +52,7 @@ class ApiClient {
       url: getUrl('/user-attribute'),
       data: attributes,
       headers: headers(token)
-    }).then((response) => {
+    }).then(() => {
       console.log('Successfully saved user attributes');
       if (successCallback) {
         successCallback();
@@ -77,10 +77,10 @@ class ApiClient {
       request.headers = headers(token)
       request.url = getUrl('/user-attribute');
     }
-    axios(request).then((response) => {
+    axios(request).then((res) => {
       console.log('Got user attributes');
       if (successCallback) {
-        successCallback(response.data);
+        successCallback(res.data);
       }
     }).catch((err) => {
       console.error('Error getting user attributes:', err);
@@ -99,4 +99,4 @@ const headers = (token) => {
 
 const getUrl = (path) => `${config.lambdaBaseUrl}${path}`
 
-export default ApiClient = new ApiClient();
+export default new ApiClient();
