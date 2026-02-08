@@ -1,7 +1,5 @@
-import { Container } from 'react-bootstrap';
-
 const About = () => (
-  <Container>
+  <div>
     <h1>Coordinate Commons</h1>
     <p>Welcome to Coordinate Commons! This is a very early stage application to keep track of places you've visited.  Places can be anything that can be represented geographically, but the things that 
     I'm starting off with are:<br />
@@ -24,7 +22,7 @@ const About = () => (
       <li>Defining your own categories to classify visits</li>
       <li>Other place types like highways, cities, and mountains</li>
     </ul>
-  </Container>
+  </div>
 );
 
 export default About;

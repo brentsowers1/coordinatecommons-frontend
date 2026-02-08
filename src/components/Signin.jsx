@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import CognitoAuth from '../classes/CognitoAuth';
 import ApiClient from '../classes/ApiClient';
 import { useEmail, useIsLoggedIn, useUserLocation, useSub, useToken, useUsername } from '../sharedState/LoggedInUser';
 
-const Signin = (props) => {
+const Signin = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');

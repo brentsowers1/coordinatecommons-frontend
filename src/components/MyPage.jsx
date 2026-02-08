@@ -6,7 +6,7 @@ import ApiClient from '../classes/ApiClient';
 import { getFullProperPlaceType } from '../util/name-utils';
 import { useIsLoggedIn, useUsername, useToken } from '../sharedState/LoggedInUser';
 
-const MyPage = (props) => {
+const MyPage = () => {
   const params = useParams();
   const [isFetchingPlaces, setIsFetchingPlaces] = useState(false);
   const [places, setPlaces] = useState(null);

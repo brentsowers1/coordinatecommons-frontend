@@ -56,7 +56,7 @@ const featureDataStructured = rawGeoJsonItems.map(item => {
   const id = isCountry ? item.properties.NAME : item.properties.postal;
   const featureType = item.geometry.type;
   if (featureType !== "Polygon" && featureType !== "MultiPolygon") {
-    console.error("Got an unexpected coordinate type - " + coordinateType);
+    console.error("Got an unexpected feature type - " + featureType);
     process.exit(1);
   }
 

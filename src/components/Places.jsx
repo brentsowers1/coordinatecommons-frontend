@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Container, Row, Col } from 'react-bootstrap';
+import { Col, Container, Row } from 'react-bootstrap';
+import './Places.css';
 import PlaceList from './PlaceList';
 import SignInOrUpPrompt from './SignInOrUpPrompt';
-import './Places.css';
 import axios from 'axios';
 import Map from '../classes/Map';
 import { getYouveOrUserHas, getFullProperPlaceType } from '../util/name-utils';
@@ -11,7 +11,7 @@ import printPercent from '../util/printPercent';
 import ApiClient from '../classes/ApiClient';
 import { useIsLoggedIn, useToken } from '../sharedState/LoggedInUser';
 
-const Places = (props) => {
+const Places = () => {
   const params = useParams();
   const [places, setPlaces] = useState([]);
   const [placeType, setPlaceType] = useState(params.placeType ? params.placeType : 'us-state');
@@ -138,7 +138,7 @@ const Places = (props) => {
     setMouseOverPlace(getPlaceFromId(id));
   }
 
-  const onMapPolygonMouseOut = (id) => {
+  const onMapPolygonMouseOut = () => {
     setMouseOverPlace(null);
   }
 
@@ -164,7 +164,7 @@ const Places = (props) => {
               const message = `Successfully called lambda to ${response.visited ? 'save' : 'remove'} visit for place ID ${response.placeId} for user ${response.username}!`;
               setLambdaResponse(message);
             },
-            (err) => {
+            () => {
               const message = `Error calling the lambda. Check the console for details`;
               setLambdaResponse(message);
             });

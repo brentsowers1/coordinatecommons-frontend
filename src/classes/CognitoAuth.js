@@ -71,4 +71,4 @@ const generateDataAttribute = (attributeName, attributeValue) => {
   });
 };
 
-export default CognitoAuth = new CognitoAuth();
+export default new CognitoAuth();
