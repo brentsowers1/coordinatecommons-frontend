@@ -189,7 +189,7 @@ const Places = () => {
     <Container>
       <Row>
         <Col>
-          <h4 className='text-center'>
+          <h4 className='text-center' data-testid="places-visited-summary">
             {getYouveOrUserHas(username, true)} visited {visitedPlaces.length} out of {places.length}&nbsp;
             {getFullProperPlaceType(placeType, false)} - {printPercent(visitedPlaces.length, places.length)}
           </h4>          

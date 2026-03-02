@@ -117,4 +117,53 @@ describe('Main Page - Places Component', () => {
     // Verify that initMap was called with the correct placeType
     expect(mockMapInstance.initializedPlaceType).toBe('us-state');
   });
+
+  it('should load getVisitedPlaces for default case when not logged in', async () => {
+    const { getByTestId } = render(
+      <MemoryRouter initialEntries={['/']}>
+        <Places />
+      </MemoryRouter>
+    );
+
+    // Wait for the data to be loaded and the component to update
+    await waitFor(() => {
+      // The heading should show "you've visited 0 out of X states"
+      // where X is the number of states in usStateData (which should be 51)
+      const heading = getByTestId('places-visited-summary');
+      expect(heading).toBeTruthy();
+      expect(heading.textContent).toContain(`0 out of ${usStateData.length}`);
+    });
+
+    // Verify that axios was called to fetch the data
+    const axiosModule = await import('axios');
+    expect(axiosModule.default.get).toHaveBeenCalledWith(
+      expect.stringContaining('us-state-data.json')
+    );
+  });
+
+  it('should populate unvisited states list after loading data', async () => {
+    const { container, getAllByTestId } = render(
+      <MemoryRouter initialEntries={['/']}>
+        <Places />
+      </MemoryRouter>
+    );
+
+    // Wait for the unvisited states to be rendered
+    await waitFor(() => {
+      const unvisitedItems = getAllByTestId('unvisited-place-item');
+      expect(unvisitedItems.length).toBe(usStateData.length);
+    });
+
+    // Get all unvisited place items
+    const unvisitedItems = getAllByTestId('unvisited-place-item');
+    const renderedStateNames = unvisitedItems.map(item => item.textContent.trim());
+
+    // Verify that all states are rendered as unvisited items
+    expect(unvisitedItems.length).toBe(usStateData.length);
+
+    // Verify that all state names from the JSON are present in the unvisited list
+    usStateData.forEach(state => {
+      expect(renderedStateNames).toContain(state.name);
+    });
+  });
 });

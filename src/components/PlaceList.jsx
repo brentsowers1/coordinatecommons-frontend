@@ -17,12 +17,12 @@ const PlaceList = (props) => {
       <Row>
         <Col md={6}>
           {visitedPlaces.map(p => 
-            <div key={p.id}>{p.name}</div>
+            <div key={p.id} data-testid="visited-place-item">{p.name}</div>
           )}
         </Col>
         <Col md={6}>
           {props.places.filter(p => !p.visited).map(p => 
-            <div key={p.id}>{p.name}</div>
+            <div key={p.id} data-testid="unvisited-place-item">{p.name}</div>
           )}
         </Col>
       </Row>
