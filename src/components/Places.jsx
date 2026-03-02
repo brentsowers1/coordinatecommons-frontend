@@ -70,6 +70,9 @@ const Places = () => {
       }
     } else if (placesOverride) {
       setPlaces(placesOverride);
+    } else {
+      // Not logged in and viewing own places — clear visited status
+      setPlaces(prev => prev.map(p => ({ ...p, visited: false })));
     }
   }
 
