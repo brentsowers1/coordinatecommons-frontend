@@ -89,13 +89,13 @@ describe('Main Page - Places Component', () => {
     mockMapInstance = null;
   });
 
-  it('should render the main page without crashing', () => {
-    renderPlaces();
+  it('should render the main page without crashing', async () => {
+    await act(async () => { renderPlaces(); });
     expect(document.body).toBeTruthy();
   });
 
   it('should load and display places content', async () => {
-    renderPlaces();
+    await act(async () => { renderPlaces(); });
     expect(document.body.innerHTML).toBeTruthy();
   });
 
