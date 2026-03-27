@@ -98,7 +98,7 @@ const Places = () => {
       getPlacesAndInitMap();
       firstRenderForMap.current = false;
     }
-  }, [placeType, map]);
+  }, [placeType, map]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // This is needed to update the callbacks to the map class any time any state value changes,
   // since the map will keep references to older versions of the functions with stale state values
@@ -115,7 +115,7 @@ const Places = () => {
       prevPlaceType.current = placeType;
       prevUsername.current = username;
     }
-  }, [placeType, username]);
+  }, [placeType, username]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Catches if the user logs in or out
   useEffect(() => {
@@ -124,7 +124,7 @@ const Places = () => {
     } else {
       getVisitedPlaces(null);
     }
-  }, [isLoggedIn]);
+  }, [isLoggedIn]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // These two catch when the URL changes to a different place or username, like if the user clicks to load a 
   // different type of place (which just changes the URL)
